@@ -18,7 +18,7 @@ create table medicamentos(
     tipo varchar(50) not null,
     indicacao varchar(150) not null,
     efeito varchar(150) not null,
-    primary key(codigo),
+    primary key(codigo)
 );
 
 create table pacientes(
@@ -54,7 +54,7 @@ create table consultas(
     codmedico int(5) not null,
     codexame int(5) not null,
     primary key (codigo),
-    foreign key (codpaciente) references pacientes(codigo),
+    foreign key (codpaciente) references pacientes(cpf),
     foreign key (codmedico) references medicos(crm),
     foreign key (codexame) references exames(codigo)
 );
