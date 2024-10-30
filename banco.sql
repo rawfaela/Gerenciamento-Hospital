@@ -6,7 +6,7 @@ create table medicos(
     telefone int(8) not null,
     endereco varchar(50) not null,
     cidade varchar(50) not null,
-    estado varchar(50) not null,
+    estado char(2) not null,
     especialidade varchar(50) not null,
     primary key (crm)
 );
@@ -16,8 +16,8 @@ create table medicamentos(
     nome varchar(50) not null,
     laboratorio varchar(50) not null,
     tipo varchar(50) not null,
-    indicacao varchar(100) not null,
-    efeito varchar(100) not null,
+    indicacao varchar(150) not null,
+    efeito varchar(150) not null,
     primary key(codigo),
 );
 
@@ -25,8 +25,9 @@ create table pacientes(
     cpf int(10) not null,
     nome varchar(50) not null,
     telefone int(8) not null,
+    endereco varchar(50) not null,
     cidade varchar(50) not null,
-    estado varchar(50) not null,
+    estado char(2) not null,
     sexo char(1) not null,
     datanasc date  not null,
     estadocivil varchar(50) not null,
@@ -39,8 +40,8 @@ create table exames(
     codigo int(5) not null,
     descricao varchar(100) not null,
     tipo varchar(50) not null,
-    preparo varchar(100),
-    pos_exame varchar(100),
+    preparo varchar(150),
+    pos_exame varchar(150),
     primary key (codigo)
 );
 
