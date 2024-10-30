@@ -1,3 +1,5 @@
+--MUDAR TODOS OS MÁXIMOS PRA 500
+
 create DATABASE hospital;
 
 create table medicos(
