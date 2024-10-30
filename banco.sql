@@ -3,8 +3,8 @@ create DATABASE hospital;
 create table medicos(
     crm int(5)  not null,
     nome varchar(50)  not null,
-    endereco varchar(50) not null,
     telefone int(8) not null,
+    endereco varchar(50) not null,
     cidade varchar(50) not null,
     estado varchar(50) not null,
     especialidade varchar(50) not null,
