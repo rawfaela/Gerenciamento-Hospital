@@ -11,16 +11,6 @@ create table medicos(
     primary key (crm)
 );
 
-create table medicamentos(
-    codigo int(5) not null,
-    nome varchar(50) not null,
-    laboratorio varchar(50) not null,
-    tipo varchar(50) not null,
-    indicacao varchar(150) not null,
-    efeito varchar(150) not null,
-    primary key(codigo)
-);
-
 create table pacientes(
     cpf int(10) not null,
     nome varchar(50) not null,
@@ -31,9 +21,7 @@ create table pacientes(
     sexo char(1) not null,
     datanasc date  not null,
     estadocivil varchar(50) not null,
-    codmedicamento int(5),
-    primary key (cpf),
-    foreign key (codmedicamento) references medicamentos(codigo)
+    primary key (cpf)
 );
 
 create table exames(
