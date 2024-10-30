@@ -12,20 +12,27 @@ conexao_banco = mysql.connector.connect(
 
 cursor = conexao_banco.cursor()
 
+# Função para verificar se o exame já existe e cadastrar se não existir
+def verificar_exame(codigo, descricao, tipo, preparo, pos_exame):
+    comando_sql = f'SELECT * FROM exames WHERE codigo = "{codigo}"'
+    cursor.execute(comando_sql)
+    exames = cursor.fetchall()  # Obtém todos os resultados
+
+    if exames:  # Se já existir, retorna False
+        return False
+    else:  # Se não existir, realiza a inserção
+        cadastrar_exame(codigo, descricao, tipo, preparo, pos_exame)
+        return True
+
 # Função para cadastrar exame
 def cadastrar_exame(codigo, descricao, tipo, preparo, pos_exame):
-    comando_sql = f"""
-        INSERT INTO exames (codigo, descricao, tipo, preparo, pos_exame) 
-        VALUES ('{codigo}', '{descricao}', '{tipo}', '{preparo}', '{pos_exame}')
-    """
+    comando_sql = f"INSERT INTO exames (codigo, descricao, tipo, preparo, pos_exame) VALUES ('{codigo}', '{descricao}', '{tipo}', '{preparo}', '{pos_exame}')"
     cursor.execute(comando_sql)
     conexao_banco.commit()
 
 # Janela principal
 janela = tk.Tk()
 janela.title("Hospital Ghellere Da Silva Machado")
-
-# Configura a geometria da janela
 janela.geometry("600x400")
 
 # Fonte
@@ -36,7 +43,7 @@ label_resposta = None
 
 # Mostra a tela de cadastro
 def mostrar_cadastro():
-    global label_resposta  # Declare a variável como global para acessar dentro da função
+    global label_resposta  
 
     for widget in janela.winfo_children():
         widget.destroy()
@@ -85,13 +92,15 @@ def mostrar_cadastro():
 
 # Envia os dados para o banco de dados
 def enviar_dados(codigo, descricao, tipo, preparo, pos_exame):
-    global label_resposta  # Acessa a variável global
+    global label_resposta  
     if label_resposta is not None:
         label_resposta.destroy()  
     
     if codigo.strip() and descricao.strip() and tipo.strip() and preparo.strip() and pos_exame.strip():
-        cadastrar_exame(codigo, descricao, tipo, preparo, pos_exame)  # Chama a função de cadastro
-        label_resposta = tk.Label(janela, text=f"Exame {descricao} cadastrado!", font=nova_fonte, fg="green")
+        if verificar_exame(codigo, descricao, tipo, preparo, pos_exame):  # Verifica e cadastra se não existir
+            label_resposta = tk.Label(janela, text=f"Exame {descricao} cadastrado!", font=nova_fonte, fg="green")
+        else:  # Se já existir
+            label_resposta = tk.Label(janela, text="Código já cadastrado!", font=nova_fonte, fg="red")
     else:
         label_resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=nova_fonte, fg="red")
     
