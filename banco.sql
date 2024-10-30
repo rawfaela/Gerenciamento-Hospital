@@ -14,7 +14,7 @@ create table medicos(
 );
 
 create table pacientes(
-    cpf int(10) not null,
+    cpf int(11) not null,
     nome varchar(50) not null,
     telefone int(8) not null,
     endereco varchar(50) not null,
