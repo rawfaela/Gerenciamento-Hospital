@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import font
 from PIL import Image, ImageTk
 
-
 conexao_banco = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -13,11 +12,9 @@ conexao_banco = mysql.connector.connect(
 )
 cursor = conexao_banco.cursor()
 
-verdinho = '#B8DAC2'
-cinza = '#7D7E80'
 bege = '#DDCCBB'
 ciano = '#0087A0'
-azulescuro = '#336182'
+azul = '#336182'
 
 janela = tk.Tk()
 janela.state("zoomed")
@@ -32,7 +29,6 @@ ftitulo = font.Font(family="Arial", size=25, weight="bold")
 
 resposta = None  
 botao_sim = None 
-infos = []
 
 def limitar_entrada(P, tipo, campo):
     valor = P
@@ -120,7 +116,7 @@ def cadastro(nome, campos, tabela):
     janela.grid_columnconfigure(0, weight=1)
     janela.grid_columnconfigure(2, weight=1) 
 
-    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azulescuro, bg=bege).grid(row=0, column=1, pady=50, padx=100)
+    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=1, pady=50, padx=100)
 
     entradas = {}
 
@@ -234,7 +230,7 @@ def alteracao(nome, campos, tabela):
     janela.grid_columnconfigure(0, weight=1)
     janela.grid_columnconfigure(2, weight=1) 
 
-    tk.Label(janela, text=f"Alteração de {nome}", font=ftitulo, fg=azulescuro, bg=bege).grid(row=0, column=0, columnspan=5, pady=60, padx=150)
+    tk.Label(janela, text=f"Alteração de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=0, columnspan=5, pady=60, padx=150)
 
     entradas = {}
 
@@ -322,7 +318,7 @@ def excluir():
     for widget in janela.winfo_children():
         widget.destroy()
 
-    tk.Label(janela, text="Exclusão de Consulta", font=ftitulo, fg=azulescuro, bg=bege).pack(pady=20)
+    tk.Label(janela, text="Exclusão de Consulta", font=ftitulo, fg=azul, bg=bege).pack(pady=20)
 
     tk.Label(janela, text="Código:", font=fonte).pack(pady=5)
     entrada_codigo = tk.Entry(janela, font=fonte)
@@ -398,7 +394,7 @@ def visualizacao(nome, campo, tabela, codigo):
     janela.grid_columnconfigure(0, weight=1)
     janela.grid_columnconfigure(2, weight=1) 
 
-    tk.Label(janela, text=f"Visualização de {nome}", font=ftitulo, fg=azulescuro, bg=bege).grid(row=0, column=0, columnspan=5, pady=60)
+    tk.Label(janela, text=f"Visualização de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=0, columnspan=5, pady=60)
 
     tk.Label(janela, text=f"{codigo}:", font=fonte).grid(row=1, column=0, sticky='e', pady=15)   
     entrada_codigo = tk.Entry(janela, font=fonte)
@@ -480,4 +476,7 @@ def visualizacao(nome, campo, tabela, codigo):
     tk.Button(janela, text="Voltar", font=fonte, command=visualizar, bg=ciano).grid(row=3, column=0, columnspan=5, pady=10)
 
 menu()
+
 janela.mainloop()
+cursor.close()
+conexao_banco.close()
