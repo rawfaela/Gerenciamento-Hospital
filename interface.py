@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 conexao_banco = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",
+    password="rafa0208",
     database="hospital"
 )
 cursor = conexao_banco.cursor()
@@ -29,41 +29,41 @@ ftitulo = font.Font(family="Arial", size=25, weight="bold")
 resposta = None  
 botao_sim = None 
 
-def limitar_entrada(valor, tipo, campo):
+def limitar_entrada(valor, campo):
     if valor == "":  
         return True
 
-    elif tipo in ('codigo', 'crm', 'codpaciente', 'codmedico', 'codexame'):
+    elif campo in ('codigo', 'crm', 'codpaciente', 'codmedico', 'codexame'):
         if valor.isdigit(): 
             return True
         return False
 
-    elif tipo in ('cpf', 'telefone'):
+    elif campo in ('cpf', 'telefone'):
         if valor.isdigit() and len(valor) <= 11:
             return True
         return False
 
-    elif tipo in ('datanasc', 'data'):
+    elif campo in ('datanasc', 'data'):
         if valor.isdigit() and len(valor) <= 8:
             return True  
         return False
 
-    elif tipo == 'estado':
+    elif campo == 'estado':
         if valor.isalpha() and len(valor) <= 2: 
             return True
         return False
     
-    elif tipo in ('cidade','nome','especialidade'):
+    elif campo in ('cidade','nome','especialidade'):
         if valor.isalpha() or " " in valor:
             return True
         return False
 
-    elif tipo in ('sexo', 'estadocivil'):
+    elif campo in ('sexo', 'estadocivil'):
         if valor.isalpha():
             return True
         return False
 
-    elif tipo == 'hora':
+    elif campo == 'hora':
         if (valor.isdigit() or ':' in valor) and len(valor) <= 5:  
             return True
         return False
@@ -114,7 +114,7 @@ def cadastro(nome, campos, tabela):
     janela.grid_columnconfigure(0, weight=1)
     janela.grid_columnconfigure(2, weight=1) 
 
-    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=1, pady=50, padx=100)
+    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=1, pady=50, padx=150)
 
     entradas = {}
 
@@ -124,10 +124,9 @@ def cadastro(nome, campos, tabela):
     for i, (campo_tabela, campo_nome) in enumerate(campos):
         tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)   
     
-        tipo = campo_tabela  
         validar = janela.register(limitar_entrada)
 
-        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
+        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', campo_tabela))
         entrada.grid(row=i+1, column=1, padx=10, pady=5, sticky='we')
         entradas[campo_tabela] = entrada
 
@@ -238,9 +237,8 @@ def alteracao(nome, campos, tabela):
     for i, (campo_tabela, campo_nome) in enumerate(campos):
         tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)
 
-        tipo = campo_tabela  
         validar = janela.register(limitar_entrada)
-        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
+        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', campo_tabela))
         entrada.grid(row=i+1, column=1, padx=10, pady=5) 
         entradas[campo_tabela] = entrada
         
@@ -314,10 +312,12 @@ def excluir():
     for widget in janela.winfo_children():
         widget.destroy()
 
+    validar = janela.register(limitar_entrada)
+
     tk.Label(janela, text="Exclusão de Consulta", font=ftitulo, fg=azul, bg=bege).pack(pady=20)
 
     tk.Label(janela, text="Código:", font=fonte).pack(pady=5)
-    entrada_codigo = tk.Entry(janela, font=fonte)
+    entrada_codigo = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', "codigo"))
     entrada_codigo.pack(pady=5)
 
     entrada_codigo.bind("<Return>", lambda _: excluir_consultas(entrada_codigo.get()))
@@ -388,12 +388,14 @@ def visualizacao(nome, campo, tabela, codigo):
         widget.destroy()
 
     janela.grid_columnconfigure(0, weight=1)
-    janela.grid_columnconfigure(2, weight=1) 
+    janela.grid_columnconfigure(2, weight=1)
+
+    validar = janela.register(limitar_entrada)
 
     tk.Label(janela, text=f"Visualização de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=0, columnspan=5, pady=60)
 
     tk.Label(janela, text=f"{codigo}:", font=fonte).grid(row=1, column=0, sticky='e', pady=15)   
-    entrada_codigo = tk.Entry(janela, font=fonte)
+    entrada_codigo = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', campo))
     entrada_codigo.grid(row=1, column=1, padx=10, pady=5, sticky='we')
 
     infos=[]
