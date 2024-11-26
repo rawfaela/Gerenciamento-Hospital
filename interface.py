@@ -1,31 +1,31 @@
+
 import mysql.connector
 import tkinter as tk
 from tkinter import font
+from PIL import Image, ImageTk
 
-# Conexão com o banco de dados
+
 conexao_banco = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",
+    password="rafa0208",
     database="hospital"
 )
-#!! MUDAR ALTERAR (nao muda tudo, se entra em um if nai entra ni outro)
-#!!!!! se der merda recolocar "global resposta" em cada cadastro_ no comeco
-# !!!  diminuir as defds (juntar e fazer uma pra cada -- mais o)
 cursor = conexao_banco.cursor()
 
 verdinho = '#B8DAC2'
 cinza = '#7D7E80'
 bege = '#DDCCBB'
-azulclaro = '#0087A0'
+ciano = '#0087A0'
 azulescuro = '#336182'
 
-# Janela principal
 janela = tk.Tk()
-janela.title("Hospital Ghellere Da Silva Machado")  #titulo da janela
 janela.state("zoomed") #tela cheia
 janela.configure(background=bege)
 
+imagem = Image.open("logo2.png")
+imagem = imagem.resize((370, 278))
+foto = ImageTk.PhotoImage(imagem)
 
 fonte = font.Font(family="Arial", size=20)
 ftitulo = font.Font(family="Arial", size=25, weight="bold")
@@ -34,886 +34,310 @@ resposta = None
 botao_sim = None 
 infos = []
 
-# Mostra o menu inicial
+def limitar_entrada(P, tipo, campo): #!p eh o valor que vai ser validado e o tipo vai ser o conjunto que tem os campos
+    valor = P
+    if valor == "":  
+        return True
+
+    elif tipo in ('codigo', 'crm', 'codpaciente', 'codmedico', 'codexame'):
+        if valor.isdigit(): #tem que ser 'tipo in' e nao  == porque quando utiliza = sempre vai retornar false, porque TIPO é uma string e nunca será igual a uma tupla inteira
+            return True
+        return False
+
+    elif tipo in ('cpf', 'telefone'):
+        if valor.isdigit() and len(valor) <= 11:
+            return True
+        return False
+
+    elif tipo in ('datanasc', 'data'):
+        if valor.isdigit() and len(valor) <= 8:
+            return True  
+        return False
+
+    elif tipo == 'estado':
+        if valor.isalpha() and len(valor) <= 2: 
+            return True
+        return False
+    
+    elif tipo in ('cidade','nome','especialidade'):
+        if valor.isalpha() or " " in valor:
+            return True
+        return False
+
+    elif tipo in ('sexo', 'estadocivil'):
+        if valor.isalpha():
+            return True
+        return False
+
+    elif tipo == 'hora':
+        if valor.isdigit() and len(valor) <= 4:  
+            return True
+        return False
+
+    return True
+
 def menu():
     for widget in janela.winfo_children():
         widget.destroy()
-    
-    titulo = tk.Label(janela, text="Hospital Ghellere Da Silva Machado", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+        
+    label_imagem = tk.Label(janela, image=foto, bg=bege)
+    label_imagem.pack()
 
-    botao_cadastrar = tk.Button(janela, text="Cadastrar", font=fonte, bg=azulclaro, fg="black", command=cadastrar)
-    botao_cadastrar.pack(pady=10)   
+    tk.Button(janela, text="Cadastrar", font=fonte, bg=ciano, fg="black", command=cadastrar).pack(pady=10)   
 
-    botao_alterar = tk.Button(janela, text="Alterar", font=fonte, bg=azulclaro, fg="black", command=alterar)
-    botao_alterar.pack(pady=10) 
+    tk.Button(janela, text="Alterar", font=fonte, bg=ciano, fg="black", command=alterar).pack(pady=10) 
 
-    botao_excluir = tk.Button(janela, text="Excluir", font=fonte, bg=azulclaro, fg="black", command=excluir)
-    botao_excluir.pack(pady=10)  
+    tk.Button(janela, text="Excluir", font=fonte, bg=ciano, fg="black", command=excluir).pack(pady=10)  
 
-    botao_visualizar = tk.Button(janela, text="Visualizar", font=fonte, bg=azulclaro, fg="black", command=visualizar)
-    botao_visualizar.pack(pady=10) 
+    tk.Button(janela, text="Visualizar", font=fonte, bg=ciano, fg="black", command=visualizar).pack(pady=10) 
 
 def cadastrar():
     for widget in janela.winfo_children():
         widget.destroy()
+        
+    label_imagem = tk.Label(janela, image=foto, bg=bege)
+    label_imagem.pack()
 
-    titulo = tk.Label(janela, text="Hospital Ghellere Da Silva Machado", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    tk.Button(janela, text="Cadastrar Exames", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Exame", [("codigo", "Código"), ("descricao", "Descrição"), ("tipo", "Tipo"), ("preparo", "Preparo"), ("pos_exame", "Pós Exame")], "exames")).pack(pady=10)
 
-    botao_cadastrar_e = tk.Button(janela, text="Cadastrar Exames", font=fonte, bg=azulclaro, fg="black", command=cadastro_exames)
-    botao_cadastrar_e.pack(pady=10)
+    tk.Button(janela, text="Cadastrar Pacientes", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Paciente", [("cpf", "CPF"), ("nome", "Nome"), ("telefone", "Telefone"), ("endereco", "Endereço"), ("cidade", "Cidade"), ("estado", "Estado"), ("sexo", "Sexo"), ("datanasc", "Data de nascimento"), ("estadocivil", "Estado Civil")], "pacientes")).pack(pady=10)
 
-    botao_cadastrar_p = tk.Button(janela, text="Cadastrar Pacientes", font=fonte, bg=azulclaro, fg="black", command=cadastro_pacientes)
-    botao_cadastrar_p.pack(pady=10)
+    tk.Button(janela, text="Cadastrar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Consulta", [("codigo", "Código"), ("tipo", "Tipo"), ("data", "Data"), ("hora", "Hora"), ("codpaciente", "Código do paciente"), ("codmedico", "Código do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
 
-    botao_cadastrar_c= tk.Button(janela, text="Cadastrar Consultas", font=fonte, bg=azulclaro, fg="black", command=cadastro_consultas)
-    botao_cadastrar_c.pack(pady=10)
+    tk.Button(janela, text="Cadastrar Médicos", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Médico", [("crm","CRM"),("nome","Nome"),("telefone","Telefone"), ("endereco","Endereço"),("cidade","Cidade"),("estado","Estado"), ("especialidade", "Especialidade")], "medicos")).pack(pady=10)    
 
-    botao_cadastrar_m= tk.Button(janela, text="Cadastrar Médicos", font=fonte, bg=azulclaro, fg="black", command=cadastro_medicos)
-    botao_cadastrar_m.pack(pady=10)    
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
+    tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=ciano).pack(pady=5)
 
 
-def cadastro_exames():
+def cadastro(nome, campos, tabela):
     for widget in janela.winfo_children():
         widget.destroy()
+        
+    global resposta
+    if resposta:
+        resposta.destroy()
 
-    titulo = tk.Label(janela, text="Cadastro de Exame", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    janela.grid_columnconfigure(0, weight=1)
+    janela.grid_columnconfigure(2, weight=1) 
+
+    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azulescuro, bg=bege).grid(row=0, column=1, pady=50, padx=100)
+
+    entradas = {}
 
     def next_entry(event, next_widget):
         next_widget.focus()
 
-    # Entradas para os campos necessários
-    codigo = tk.Label(janela, text="Código:", font=fonte)
-    codigo.pack(pady=5)
-    entrada_codigo = tk.Entry(janela, font=fonte)
-    entrada_codigo.pack(pady=5)
-
-    descricao = tk.Label(janela, text="Descrição:", font=fonte)
-    descricao.pack(pady=5)
-    entrada_descricao = tk.Entry(janela, font=fonte)
-    entrada_descricao.pack(pady=5)
-
-    tipo = tk.Label(janela, text="Tipo:", font=fonte)
-    tipo.pack(pady=5)
-    entrada_tipo = tk.Entry(janela, font=fonte)
-    entrada_tipo.pack(pady=5)
-
-    preparo = tk.Label(janela, text="Preparo:", font=fonte)
-    preparo.pack(pady=5)
-    entrada_preparo = tk.Entry(janela, font=fonte)
-    entrada_preparo.pack(pady=5)
-
-    pos_exame = tk.Label(janela, text="Pós Exame:", font=fonte)
-    pos_exame.pack(pady=5)
-    entrada_pos_exame = tk.Entry(janela, font=fonte)
-    entrada_pos_exame.pack(pady=5)
-
-    entrada_codigo.bind("<Return>", lambda event: next_entry(event, entrada_descricao))
-    entrada_descricao.bind("<Return>", lambda event: next_entry(event, entrada_tipo))
-    entrada_tipo.bind("<Return>", lambda event: next_entry(event, entrada_preparo))
-    entrada_preparo.bind("<Return>", lambda event: next_entry(event, entrada_pos_exame))
-    entrada_pos_exame.bind("<Return>", lambda _: enviar_dados_exames(
-        entrada_codigo.get(),
-        entrada_descricao.get(),
-        entrada_tipo.get(),
-        entrada_preparo.get(),
-        entrada_pos_exame.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: enviar_dados_exames(
-        entrada_codigo.get(),
-        entrada_descricao.get(),
-        entrada_tipo.get(),
-        entrada_preparo.get(),
-        entrada_pos_exame.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-def enviar_dados_exames(codigo, descricao, tipo, preparo, pos_exame):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
+    for i, (campo_tabela, campo_nome) in enumerate(campos): #i é usado no if i<len, nao agora, enumerate p iterar sobre campos dando dois elementos cada vez (indice e tupla com tabela e nome)
+        tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)   
     
-    if codigo.strip() and descricao and tipo and preparo and pos_exame:
-        comando_sql = f'SELECT * FROM exames WHERE codigo = {codigo}'
+        tipo = campo_tabela  
+        validar = janela.register(limitar_entrada)
+
+        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
+        entrada.grid(row=i+1, column=1, padx=10, pady=5, sticky='we') #!esse tem q ficar aq
+        entradas[campo_tabela] = entrada
+
+        if i < len(campos) - 1: #vai ate o penultimo item (pra cada enter ir na proxima caixinha) pra dps chamar a funcao (no else)
+            entrada.bind("<Return>", lambda event, next_widget=campos[i + 1][0]: next_entry(event, entradas[next_widget]))
+        else:
+            entrada.bind("<Return>", lambda _: enviar_cadastro(nome, tabela, campos, entradas))
+
+    tk.Button(janela, text="Enviar", bg=ciano, font=fonte, command=lambda: enviar_cadastro(nome, tabela, campos, entradas)).grid(row=len(campos)+1, column=1, pady=10)
+    tk.Button(janela, text="Voltar", font=fonte, command=cadastrar, bg=ciano).grid(row=len(campos)+2, column=1, pady=10)
+
+def enviar_cadastro(nome, tabela, campos, entradas):
+    global resposta
+    if resposta:
+        resposta.destroy()
+
+    erro = False
+
+    valores = {campo: entradas[campo].get().strip() for campo, _ in campos} #_ significa q o segundo valor n vai ser usado, associa um valor digitado pra cada campo em campos
+    #fica tipo assim: valores = {"codigo": "123", "preparo": "Jejum"} valores digitados pelo user
+
+    if all(valores[campo] for campo in valores): #se todos foram preenchidos
+        codigo = campos[0][0] #codigo, crm ou cpf
+        comando_sql = f'SELECT * FROM {tabela} WHERE {codigo} = "{valores[codigo]}"'
         cursor.execute(comando_sql)
-        exames = cursor.fetchall() 
-        if exames:  # Verifica e cadastra se não existir
+        resultado = cursor.fetchall()
+
+        if resultado:
             resposta = tk.Label(janela, text="Código já cadastrado!", font=fonte, fg="red")
         else:
-            comando_sql = f"INSERT INTO exames (codigo, descricao, tipo, preparo, pos_exame) VALUES ('{codigo}', '{descricao}', '{tipo}', '{preparo}', '{pos_exame}')"
-            cursor.execute(comando_sql)
-            conexao_banco.commit() 
-            resposta = tk.Label(janela, text=f"Exame {descricao} cadastrado!", font=fonte, fg="pink")
+            if resposta:
+                resposta.destroy()
+
+            if tabela != 'consultas':
+                enviar_cadastrar(nome, tabela, valores, campos)
+            else:
+                cursor.execute(f'SELECT * FROM pacientes where cpf={valores[campos[4][0]]}')
+                checar = cursor.fetchone()
+                if checar is None:
+                    resposta = tk.Label(janela, text=f"Código do paciente não encontrado!", font=fonte, fg="red")
+                    resposta.grid(row=len(campos)+3, column=1, pady=10)
+                    erro = True
+
+                cursor.execute(f'SELECT * FROM medicos where crm={valores[campos[5][0]]}')
+                checar = cursor.fetchone()
+                if checar is None:
+                    resposta = tk.Label(janela, text=f"Código do médico não encontrado!", font=fonte, fg="red")
+                    resposta.grid(row=len(campos)+3, column=1, pady=10)
+                    erro = True
+
+                cursor.execute(f'SELECT * FROM exames where codigo={valores[campos[6][0]]}')
+                checar = cursor.fetchone()
+                if checar is None:                        
+                    resposta = tk.Label(janela, text=f"Código do exame não encontrado!", font=fonte, fg="red")
+                    resposta.grid(row=len(campos)+3, column=1, pady=10)
+                    erro = True
+                if erro:
+                    return
+                else:
+                    enviar_cadastrar(nome, tabela, valores, campos)
     else:
         resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=fonte, fg="red")
+    resposta.grid(row=len(campos)+3, column=1, pady=10)
     
-    resposta.pack(pady=20)
-# Envia os dados para o banco de dados 
-
-
-
-def cadastro_pacientes():
-    for widget in janela.winfo_children():
-        widget.destroy()
-
-    titulo = tk.Label(janela, text="Cadastro de Paciente", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
-
-    def next_entry(event, next_widget):
-        next_widget.focus()
-
-    # Entradas para os campos necessários
-    cpf = tk.Label(janela, text="CPF:", font=fonte)
-    cpf.pack(pady=5)
-    entrada_cpf = tk.Entry(janela, font=fonte)
-    entrada_cpf.pack(pady=5)
-
-    nome = tk.Label(janela, text="Nome:", font=fonte)
-    nome.pack(pady=5)
-    entrada_nome = tk.Entry(janela, font=fonte)
-    entrada_nome.pack(pady=5)
-
-    telefone = tk.Label(janela, text="Telefone:", font=fonte)
-    telefone.pack(pady=5)
-    entrada_telefone = tk.Entry(janela, font=fonte)
-    entrada_telefone.pack(pady=5)
-
-    endereco = tk.Label(janela, text="Endereço:", font=fonte)
-    endereco.pack(pady=5)
-    entrada_endereco = tk.Entry(janela, font=fonte)
-    entrada_endereco.pack(pady=5)
-
-    cidade = tk.Label(janela, text="Cidade:", font=fonte)
-    cidade.pack(pady=5)
-    entrada_cidade = tk.Entry(janela, font=fonte)
-    entrada_cidade.pack(pady=5)
-
-    estado = tk.Label(janela, text="Estado:", font=fonte)
-    estado.pack(pady=5)
-    entrada_estado = tk.Entry(janela, font=fonte)
-    entrada_estado.pack(pady=5)
-
-    sexo = tk.Label(janela, text="Sexo:", font=fonte)
-    sexo.pack(pady=5)
-    entrada_sexo = tk.Entry(janela, font=fonte)
-    entrada_sexo.pack(pady=5)
-
-    datanasc = tk.Label(janela, text="Data de nascimento:", font=fonte)
-    datanasc.pack(pady=5)
-    entrada_datanasc = tk.Entry(janela, font=fonte)
-    entrada_datanasc.pack(pady=5)
-
-    estadocivil = tk.Label(janela, text="Estado civil:", font=fonte)
-    estadocivil.pack(pady=5)
-    entrada_estadocivil = tk.Entry(janela, font=fonte)
-    entrada_estadocivil.pack(pady=5)
-
-    entrada_cpf.bind("<Return>", lambda event: next_entry(event, entrada_nome))
-    entrada_nome.bind("<Return>", lambda event: next_entry(event, entrada_telefone))
-    entrada_telefone.bind("<Return>", lambda event: next_entry(event, entrada_endereco))
-    entrada_endereco.bind("<Return>", lambda event: next_entry(event, entrada_cidade))
-    entrada_cidade.bind("<Return>", lambda event: next_entry(event, entrada_estado))
-    entrada_estado.bind("<Return>", lambda event: next_entry(event, entrada_sexo))
-    entrada_sexo.bind("<Return>", lambda event: next_entry(event, entrada_datanasc))
-    entrada_datanasc.bind("<Return>", lambda event: next_entry(event, entrada_estadocivil))
-    entrada_estadocivil.bind("<Return>", lambda _: enviar_dados_pacientes(
-        entrada_cpf.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get(),
-        entrada_sexo.get(),
-        entrada_datanasc.get(),
-        entrada_estadocivil.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: enviar_dados_pacientes(
-        entrada_cpf.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get(),
-        entrada_sexo.get(),
-        entrada_datanasc.get(),
-        entrada_estadocivil.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-def enviar_dados_pacientes(cpf, nome, telefone, endereco, cidade, estado, sexo, datanasc, estadocivil):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
+def enviar_cadastrar(nome, tabela, valores, campos):
+    comando_sql = f"INSERT INTO {tabela} ({', '.join([campo for campo, _ in campos])}) VALUES ({', '.join([repr(valores[campo]) for campo, _ in campos])})" #pega o 1 valor de cada tupla na lista campos e junta numa string separada por virgulas, repr formata os valores (digt pelo user) pro sql (str entre aspas)
+    cursor.execute(comando_sql)
+    conexao_banco.commit()
     
-    if cpf.strip() and nome and telefone.strip() and endereco and cidade and estado.strip() and sexo.strip() and datanasc.strip() and estadocivil.strip():
-        comando_sql = f'SELECT * FROM pacientes WHERE cpf = "{cpf}"'
-        cursor.execute(comando_sql)
-        pacientes = cursor.fetchall()
-        if pacientes:  # Verifica e cadastra se não existir
-            resposta = tk.Label(janela, text="CPF já cadastrado!", font=fonte, fg="red")
-        else:
-            comando_sql = f"INSERT INTO pacientes (cpf, nome, telefone, endereco, cidade, estado, sexo, datanasc, estadocivil) VALUES ('{cpf}', '{nome}', '{telefone}', '{endereco}', '{cidade}', '{estado}', '{sexo}', '{datanasc}', '{estadocivil}')"
-            cursor.execute(comando_sql)
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Paciente {nome} cadastrado!", font=fonte, fg="pink")
-    else:
-        resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=fonte, fg="red")
-    
-    resposta.pack(pady=20)
-
-# Função para cadastrar paciente
-
-def cadastro_consultas():
-    for widget in janela.winfo_children():
-        widget.destroy()
-
-    titulo = tk.Label(janela, text="Cadastro de Consulta", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
-
-    def next_entry(event, next_widget):
-        next_widget.focus()
-
-    codigo = tk.Label(janela, text="Código:", font=fonte)
-    codigo.pack(pady=5)
-    entrada_codigo = tk.Entry(janela, font=fonte)
-    entrada_codigo.pack(pady=5)
-
-    data = tk.Label(janela, text="Data:", font=fonte)
-    data.pack(pady=5)
-    entrada_data = tk.Entry(janela, font=fonte)
-    entrada_data.pack(pady=5)
-
-    hora = tk.Label(janela, text="Hora:", font=fonte)
-    hora.pack(pady=5)
-    entrada_hora = tk.Entry(janela, font=fonte)
-    entrada_hora.pack(pady=5)
-
-    tipo = tk.Label(janela, text="Tipo:", font=fonte)
-    tipo.pack(pady=5)
-    entrada_tipo = tk.Entry(janela, font=fonte)
-    entrada_tipo.pack(pady=5)
-
-    codpaciente = tk.Label(janela, text="Código Paciente:", font=fonte)
-    codpaciente.pack(pady=5)
-    entrada_codpaciente = tk.Entry(janela, font=fonte)
-    entrada_codpaciente.pack(pady=5)
-
-    codmedico = tk.Label(janela, text="Código Médico:", font=fonte)
-    codmedico.pack(pady=5)
-    entrada_codmedico = tk.Entry(janela, font=fonte)
-    entrada_codmedico.pack(pady=5)
-
-    codexame = tk.Label(janela, text="Código Exame:", font=fonte)
-    codexame.pack(pady=5)
-    entrada_codexame = tk.Entry(janela, font=fonte)
-    entrada_codexame.pack(pady=5)
-
-    entrada_codigo.bind("<Return>", lambda event: next_entry(event, entrada_data))
-    entrada_data.bind("<Return>", lambda event: next_entry(event, entrada_hora))
-    entrada_hora.bind("<Return>", lambda event: next_entry(event, entrada_tipo))
-    entrada_tipo.bind("<Return>", lambda event: next_entry(event, entrada_codpaciente))
-    entrada_codpaciente.bind("<Return>", lambda event: next_entry(event, entrada_codmedico))
-    entrada_codmedico.bind("<Return>", lambda event: next_entry(event, entrada_codexame))
-    entrada_codexame.bind("<Return>", lambda event: enviar_dados_consultas(     
-     entrada_codigo.get(),
-     entrada_data.get(),
-     entrada_hora.get(),
-     entrada_tipo.get(),
-     entrada_codpaciente.get(),
-     entrada_codmedico.get(),
-     entrada_codexame.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: enviar_dados_consultas(
-        entrada_codigo.get(),
-        entrada_data.get(),
-        entrada_hora.get(),
-        entrada_tipo.get(),
-        entrada_codpaciente.get(),
-        entrada_codmedico.get(),
-        entrada_codexame.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-# Envia os dados para o banco de dados
-def enviar_dados_consultas(codigo, data, hora, tipo, codpaciente, codmedico, codexame):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
-    
-    if codigo.strip() and data.strip() and hora.strip() and tipo and codpaciente.strip() and codmedico.strip() and codexame.strip():
-        comando_sql = f'SELECT * FROM consultas WHERE codigo = "{codigo}"'
-        cursor.execute(comando_sql)
-        consultas = cursor.fetchall()
-
-        if consultas:  # Verifica e cadastra se não existir
-            resposta = tk.Label(janela, text="Código já cadastrado!", font=fonte, fg="red")
-        else:  
-            comando_sql = f'INSERT INTO consultas (codigo, data, hora, tipo, codpaciente, codmedico, codexame) VALUES ({codigo},"{data}","{hora}00","{tipo}",{codpaciente},{codmedico},{codexame})'
-            cursor.execute(comando_sql)
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Consulta do código {codigo} cadastrado!", font=fonte, fg="pink")
-    else:
-        resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=fonte, fg="red")
-    
-    resposta.pack(pady=20)
-
-
-
-
-def cadastro_medicos():
-    for widget in janela.winfo_children():
-        widget.destroy()
-
-    titulo = tk.Label(janela, text="Cadastro de Médico", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
-
-    def next_entry(event, next_widget):
-        next_widget.focus()
-
-    # Entradas para os campos necessários
-    crm = tk.Label(janela, text="CRM:", font=fonte)
-    crm.pack(pady=5)
-    entrada_crm = tk.Entry(janela, font=fonte)
-    entrada_crm.pack(pady=5)
-
-    nome = tk.Label(janela, text="Nome:", font=fonte)
-    nome.pack(pady=5)
-    entrada_nome = tk.Entry(janela, font=fonte)
-    entrada_nome.pack(pady=5)
-
-    telefone = tk.Label(janela, text="Telefone:", font=fonte)
-    telefone.pack(pady=5)
-    entrada_telefone = tk.Entry(janela, font=fonte)
-    entrada_telefone.pack(pady=5)
-
-    endereco = tk.Label(janela, text="Endereço:", font=fonte)
-    endereco.pack(pady=5)
-    entrada_endereco = tk.Entry(janela, font=fonte)
-    entrada_endereco.pack(pady=5)
-
-    cidade = tk.Label(janela, text="Cidade:", font=fonte)
-    cidade.pack(pady=5)
-    entrada_cidade = tk.Entry(janela, font=fonte)
-    entrada_cidade.pack(pady=5)
-
-    estado = tk.Label(janela, text="Estado:", font=fonte)
-    estado.pack(pady=5)
-    entrada_estado = tk.Entry(janela, font=fonte)
-    entrada_estado.pack(pady=5)
-
-    especialidade = tk.Label(janela, text="Especialidade:", font=fonte)
-    especialidade.pack(pady=5)
-    entrada_especialidade = tk.Entry(janela, font=fonte)
-    entrada_especialidade.pack(pady=5)
-
-    entrada_crm.bind("<Return>", lambda event: next_entry(event, entrada_nome))
-    entrada_nome.bind("<Return>", lambda event: next_entry(event, entrada_telefone))
-    entrada_telefone.bind("<Return>", lambda event: next_entry(event, entrada_endereco))
-    entrada_endereco.bind("<Return>", lambda event: next_entry(event, entrada_cidade))
-    entrada_cidade.bind("<Return>", lambda event: next_entry(event, entrada_estado))
-    entrada_estado.bind("<Return>", lambda event: next_entry(event, entrada_especialidade))
-    entrada_especialidade.bind("<Return>", lambda _: enviar_dados_medicos(
-        entrada_crm.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get(),
-        entrada_especialidade.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: enviar_dados_medicos(
-        entrada_crm.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get(),
-        entrada_especialidade.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-# Envia os dados para o banco de dados
-def enviar_dados_medicos(crm, nome, telefone, endereco, cidade, estado, especialidade):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
-    
-    if crm.strip() and nome and telefone.strip() and endereco and cidade and estado.strip() and especialidade:
-        comando_sql = f'SELECT * FROM medicos WHERE crm = "{crm}"'
-        cursor.execute(comando_sql)
-        medicos = cursor.fetchall()
-        if medicos:  # Verifica e cadastra se não existir
-            comando_sql = f"INSERT INTO medicos (crm, nome, telefone, endereco, cidade, estado, especialidade) VALUES ('{crm}', '{nome}', '{telefone}', '{endereco}', '{cidade}', '{estado}', '{especialidade}')"
-            cursor.execute(comando_sql)
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Médico {nome} cadastrado!", font=fonte, fg="pink")
-
-        else:  # Se já existir
-            resposta = tk.Label(janela, text="Médico já cadastrado!", font=fonte, fg="red")
-    else:
-        resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=fonte, fg="red")
-    
-    resposta.pack(pady=20)
+    descricao = valores[campos[1][0]] #segundo item de campos na posicao 0 (segunda coluna do sql) digitado pelo user
+    resposta = tk.Label(janela, text=f"{nome} {descricao} cadastrado!", font=fonte, fg="green")
+    resposta.grid(row=len(campos)+3, column=1, pady=10)
 
 def alterar():
     for widget in janela.winfo_children():
         widget.destroy()
 
-    titulo = tk.Label(janela, text="Hospital Ghellere Da Silva Machado", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    label_imagem = tk.Label(janela, image=foto, bg=bege)
+    label_imagem.pack()
 
-    botao_alterar_e = tk.Button(janela, text="Alterar Exames", font=fonte, bg=azulclaro, fg="black", command=alteracao_exames)
-    botao_alterar_e.pack(pady=10)
+    tk.Button(janela, text="Alterar Exames", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Exame", [("codigo", "Código"), ("preparo", "Preparo"), ("pos_exame", "Pós Exame")], "exames")).pack(pady=10)
 
-    botao_alterar_p = tk.Button(janela, text="Alterar Pacientes", font=fonte, bg=azulclaro, fg="black", command=alteracao_pacientes)
-    botao_alterar_p.pack(pady=10)
+    tk.Button(janela, text="Alterar Pacientes", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Paciente", [("cpf", "CPF"), ("nome", "Nome"), ("telefone", "Telefone"), ("endereco", "Endereço"), ("cidade", "Cidade"), ("estado", "Estado"), ("estadocivil", "Estado Civil")], "pacientes")).pack(pady=10)
 
-    botao_alterar_c= tk.Button(janela, text="Alterar Consultas", font=fonte, bg=azulclaro, fg="black", command=alteracao_consultas)
-    botao_alterar_c.pack(pady=10)
+    tk.Button(janela, text="Alterar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Consulta", [("codigo", "Código"), ("data", "Data"), ("hora", "Hora"), ("tipo", "Tipo"), ("codmedico", "Código do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
 
-    botao_alterar_m= tk.Button(janela, text="Alterar Médicos", font=fonte, bg=azulclaro, fg="black", command=alteracao_medicos)
-    botao_alterar_m.pack(pady=10) 
+    tk.Button(janela, text="Alterar Médicos", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Médico", [("crm","CRM"),("nome","Nome"),("telefone","Telefone"), ("endereco","Endereço"),("cidade","Cidade"),("estado","Estado")], "medicos")).pack(pady=10) 
 
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
+    tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=ciano).pack(pady=5)
 
-def alteracao_exames():
+def alteracao(nome, campos, tabela):
     for widget in janela.winfo_children():
         widget.destroy()
-
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
-
-    titulo = tk.Label(janela, text="Alteração de Exame", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
-
-    def next_entry(event, next_widget):
-        next_widget.focus()
-
-    codigo = tk.Label(janela, text="Código:", font=fonte)
-    codigo.pack(pady=5)
-    entrada_codigo = tk.Entry(janela, font=fonte)
-    entrada_codigo.pack(pady=5)
-
-    preparo = tk.Label(janela, text="Preparo:", font=fonte)
-    preparo.pack(pady=5)
-    entrada_preparo = tk.Entry(janela, font=fonte)
-    entrada_preparo.pack(pady=5)
-
-    pos_exame = tk.Label(janela, text="Pós Exame:", font=fonte)
-    pos_exame.pack(pady=5)
-    entrada_pos_exame = tk.Entry(janela, font=fonte)
-    entrada_pos_exame.pack(pady=5)
-
-    entrada_codigo.bind("<Return>", lambda event: next_entry(event, entrada_preparo))
-    entrada_preparo.bind("<Return>", lambda event: next_entry(event, entrada_pos_exame))
-    entrada_pos_exame.bind("<Return>", lambda _: alterar_exames(
-        entrada_codigo.get(),
-        entrada_preparo.get(),
-        entrada_pos_exame.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: alterar_exames(
-        entrada_codigo.get(),
-        entrada_preparo.get(),
-        entrada_pos_exame.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-def alterar_exames(codigo, preparo, pos_exame):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()
-
-    if codigo.strip() and (preparo or pos_exame):
-        comando_sql= f'SELECT codigo FROM exames WHERE codigo={codigo}'
-        cursor.execute(comando_sql)
-        exames=cursor.fetchall()
-        if exames:           
-            if preparo:
-                comando_sql=f'UPDATE exames SET preparo="{preparo}" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)
-            if pos_exame:
-                comando_sql=f'UPDATE exames SET pos_exame="{pos_exame}" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)    
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Exame alterado!", font=fonte, fg="pink")    
-        else:
-            resposta = tk.Label(janela, text=f"Código não cadastrado!", font=fonte, fg="red")
-    else:
-        resposta=tk.Label(janela, text=f"Faltam informações!", font=fonte, fg="red")
-    resposta.pack(pady=20)
-
-def alteracao_pacientes():
-    for widget in janela.winfo_children():
-        widget.destroy()
-
-    titulo = tk.Label(janela, text="Alteração de Paciente", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
-
-    def next_entry(event, next_widget):
-        next_widget.focus()
-
-    # Entradas para os campos necessários
-    cpf = tk.Label(janela, text="CPF:", font=fonte)
-    cpf.pack(pady=5)
-    entrada_cpf = tk.Entry(janela, font=fonte)
-    entrada_cpf.pack(pady=5)
-
-    nome = tk.Label(janela, text="Nome:", font=fonte)
-    nome.pack(pady=5)
-    entrada_nome = tk.Entry(janela, font=fonte)
-    entrada_nome.pack(pady=5)
-
-    telefone = tk.Label(janela, text="Telefone:", font=fonte)
-    telefone.pack(pady=5)
-    entrada_telefone = tk.Entry(janela, font=fonte)
-    entrada_telefone.pack(pady=5)
-
-    endereco = tk.Label(janela, text="Endereço:", font=fonte)
-    endereco.pack(pady=5)
-    entrada_endereco = tk.Entry(janela, font=fonte)
-    entrada_endereco.pack(pady=5)
-
-    cidade = tk.Label(janela, text="Cidade:", font=fonte)
-    cidade.pack(pady=5)
-    entrada_cidade = tk.Entry(janela, font=fonte)
-    entrada_cidade.pack(pady=5)
-
-    estado = tk.Label(janela, text="Estado:", font=fonte)
-    estado.pack(pady=5)
-    entrada_estado = tk.Entry(janela, font=fonte)
-    entrada_estado.pack(pady=5)
-
-    estadocivil = tk.Label(janela, text="Estado civil:", font=fonte)
-    estadocivil.pack(pady=5)
-    entrada_estadocivil = tk.Entry(janela, font=fonte)
-    entrada_estadocivil.pack(pady=5)
-
-    entrada_cpf.bind("<Return>", lambda event: next_entry(event, entrada_nome))
-    entrada_nome.bind("<Return>", lambda event: next_entry(event, entrada_telefone))
-    entrada_telefone.bind("<Return>", lambda event: next_entry(event, entrada_endereco))
-    entrada_endereco.bind("<Return>", lambda event: next_entry(event, entrada_cidade))
-    entrada_cidade.bind("<Return>", lambda event: next_entry(event, entrada_estado))
-    entrada_estado.bind("<Return>", lambda event: next_entry(event, entrada_estadocivil))
-    entrada_estadocivil.bind("<Return>", lambda _: alterar_pacientes(
-        entrada_cpf.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get(),
-        entrada_estadocivil.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: alterar_pacientes(
-        entrada_cpf.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get(),
-        entrada_estadocivil.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-def alterar_pacientes(cpf, nome, telefone, endereco, cidade, estado, estadocivil):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()
-
-    if cpf.strip() and (nome or telefone or endereco or cidade or estado or estadocivil):
-        comando_sql= f'SELECT cpf FROM pacientes WHERE cpf={cpf}'
-        cursor.execute(comando_sql)
-        pacientes=cursor.fetchall()
-        if pacientes:
-            if nome:
-                comando_sql = f'UPDATE pacientes SET nome="{nome}" where cpf={cpf}'
-                cursor.execute(comando_sql)
-            if telefone:
-                comando_sql = f'UPDATE pacientes SET telefone="{telefone}" where cpf={cpf}'
-                cursor.execute(comando_sql)
-            if endereco:
-                comando_sql = f'UPDATE pacientes SET endereco="{endereco}" where cpf={cpf}'
-                cursor.execute(comando_sql)
-            if cidade:
-                comando_sql = f'UPDATE pacientes SET cidade="{cidade}" where cpf={cpf}'
-                cursor.execute(comando_sql)
-            if estado:
-                comando_sql = f'UPDATE pacientes SET estado="{estado}" where cpf={cpf}'
-                cursor.execute(comando_sql)
-            if estadocivil:
-                comando_sql = f'UPDATE pacientes SET estadocivil="{estadocivil}" where cpf={cpf}'
-                cursor.execute(comando_sql)
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Paciente alterado!", font=fonte, fg="pink")
-        else:
-            resposta = tk.Label(janela, text=f"CPF não cadastrado!", font=fonte, fg="red")
-    else:
-        resposta = tk.Label(janela, text=f"Faltam informações!", font=fonte, fg="red")
         
-        resposta.pack(pady=20)
+    global resposta
+    if resposta:
+        resposta.destroy()
 
-def alteracao_consultas():
-    for widget in janela.winfo_children():
-        widget.destroy()
+    janela.grid_columnconfigure(0, weight=1)
+    janela.grid_columnconfigure(2, weight=1) 
 
-    titulo = tk.Label(janela, text="Alteração de Consulta", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    tk.Label(janela, text=f"Alteração de {nome}", font=ftitulo, fg=azulescuro, bg=bege).grid(row=0, column=0, columnspan=5, pady=60, padx=150)
 
-    def next_entry(event, next_widget):
-        next_widget.focus()
-
-    codigo = tk.Label(janela, text="Código:", font=fonte)
-    codigo.pack(pady=5)
-    entrada_codigo = tk.Entry(janela, font=fonte)
-    entrada_codigo.pack(pady=5)
-
-    data = tk.Label(janela, text="Data:", font=fonte)
-    data.pack(pady=5)
-    entrada_data = tk.Entry(janela, font=fonte)
-    entrada_data.pack(pady=5)
-
-    hora = tk.Label(janela, text="Hora:", font=fonte)
-    hora.pack(pady=5)
-    entrada_hora = tk.Entry(janela, font=fonte)
-    entrada_hora.pack(pady=5)
-
-    tipo = tk.Label(janela, text="Tipo:", font=fonte)
-    tipo.pack(pady=5)
-    entrada_tipo = tk.Entry(janela, font=fonte)
-    entrada_tipo.pack(pady=5)
-
-    codmedico = tk.Label(janela, text="Código Médico:", font=fonte)
-    codmedico.pack(pady=5)
-    entrada_codmedico = tk.Entry(janela, font=fonte)
-    entrada_codmedico.pack(pady=5)
-
-    codexame = tk.Label(janela, text="Código Exame:", font=fonte)
-    codexame.pack(pady=5)
-    entrada_codexame = tk.Entry(janela, font=fonte)
-    entrada_codexame.pack(pady=5)
-
-    entrada_codigo.bind("<Return>", lambda event: next_entry(event, entrada_data))
-    entrada_data.bind("<Return>", lambda event: next_entry(event, entrada_hora))
-    entrada_hora.bind("<Return>", lambda event: next_entry(event, entrada_tipo))
-    entrada_tipo.bind("<Return>", lambda event: next_entry(event, entrada_codmedico))
-    entrada_codmedico.bind("<Return>", lambda event: next_entry(event, entrada_codexame))
-    entrada_codexame.bind("<Return>", lambda event: alterar_consultas(     
-     entrada_codigo.get(),
-     entrada_data.get(),
-     entrada_hora.get(),
-     entrada_tipo.get(),
-     entrada_codmedico.get(),
-     entrada_codexame.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: alterar_consultas(
-        entrada_codigo.get(),
-        entrada_data.get(),
-        entrada_hora.get(),
-        entrada_tipo.get(),
-        entrada_codmedico.get(),
-        entrada_codexame.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-# Envia os dados para o banco de dados
-def alterar_consultas(codigo, data, hora, tipo, codmedico, codexame):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
-    
-    if codigo.strip() and (data.strip() or hora.strip() or tipo or codmedico.strip() or codexame.strip()):
-        comando_sql = f'SELECT * FROM consultas WHERE codigo = "{codigo}"'
-        cursor.execute(comando_sql)
-        consultas = cursor.fetchall()
-        if consultas: 
-            if data:
-                comando_sql=f'UPDATE consultas SET data="{data}" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)
-            if hora:
-                comando_sql=f'UPDATE consultas SET hora="{hora}00" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)
-            if tipo:
-                comando_sql=f'UPDATE consultas SET tipo="{tipo}" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)
-            if codmedico:
-                comando_sql=f'UPDATE consultas SET codmedico="{codmedico}" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)
-            if codexame:
-                comando_sql=f'UPDATE consultas SET codexame="{codexame}" WHERE codigo={codigo}'
-                cursor.execute(comando_sql)
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Consulta alterada!", font=fonte, fg="pink")    
-        else:
-            resposta = tk.Label(janela, text=f"Código não cadastrado!", font=fonte, fg="red")
-    else:
-        resposta=tk.Label(janela, text=f"Faltam informações!", font=fonte, fg="red")
-    resposta.pack(pady=20)
-
-def alteracao_medicos():
-    for widget in janela.winfo_children():
-        widget.destroy()
-
-    titulo = tk.Label(janela, text="Alteração de Médico", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    entradas = {}
 
     def next_entry(event, next_widget):
         next_widget.focus()
 
-    # Entradas para os campos necessários
-    crm = tk.Label(janela, text="CRM:", font=fonte)
-    crm.pack(pady=5)
-    entrada_crm = tk.Entry(janela, font=fonte)
-    entrada_crm.pack(pady=5)
+    for i, (campo_tabela, campo_nome) in enumerate(campos): #i é usado no if i<len, nao agora, enumerate p iterar sobre campos dando dois elementos cada vez (indice e tupla com tabela e nome)
+        tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)
 
-    nome = tk.Label(janela, text="Nome:", font=fonte)
-    nome.pack(pady=5)
-    entrada_nome = tk.Entry(janela, font=fonte)
-    entrada_nome.pack(pady=5)
-
-    telefone = tk.Label(janela, text="Telefone:", font=fonte)
-    telefone.pack(pady=5)
-    entrada_telefone = tk.Entry(janela, font=fonte)
-    entrada_telefone.pack(pady=5)
-
-    endereco = tk.Label(janela, text="Endereço:", font=fonte)
-    endereco.pack(pady=5)
-    entrada_endereco = tk.Entry(janela, font=fonte)
-    entrada_endereco.pack(pady=5)
-
-    cidade = tk.Label(janela, text="Cidade:", font=fonte)
-    cidade.pack(pady=5)
-    entrada_cidade = tk.Entry(janela, font=fonte)
-    entrada_cidade.pack(pady=5)
-
-    estado = tk.Label(janela, text="Estado:", font=fonte)
-    estado.pack(pady=5)
-    entrada_estado = tk.Entry(janela, font=fonte)
-    entrada_estado.pack(pady=5)
-
-    entrada_crm.bind("<Return>", lambda event: next_entry(event, entrada_nome))
-    entrada_nome.bind("<Return>", lambda event: next_entry(event, entrada_telefone))
-    entrada_telefone.bind("<Return>", lambda event: next_entry(event, entrada_endereco))
-    entrada_endereco.bind("<Return>", lambda event: next_entry(event, entrada_cidade))
-    entrada_cidade.bind("<Return>", lambda event: next_entry(event, entrada_estado))
-    entrada_estado.bind("<Return>", lambda _: alterar_medicos(
-        entrada_crm.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get()
-    ))
-
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
-    command=lambda: alterar_medicos(
-        entrada_crm.get(),
-        entrada_nome.get(),
-        entrada_telefone.get(),
-        entrada_endereco.get(),
-        entrada_cidade.get(),
-        entrada_estado.get()
-    ))
-    botao_enviar.pack(pady=10)
-
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
-
-# Envia os dados para o banco de dados
-def alterar_medicos(crm, nome, telefone, endereco, cidade, estado):
-    global resposta  
-    if resposta is not None:
-        resposta.destroy()  
-    
-    if crm.strip() and (nome or telefone.strip() or endereco or cidade or estado.strip()):
-        comando_sql = f'SELECT * FROM medicos WHERE crm = "{crm}"'
-        cursor.execute(comando_sql)
-        medicos = cursor.fetchall()
-        if medicos: 
-            if nome:
-                comando_sql=f'UPDATE medicos SET nome="{nome}" WHERE crm={crm}'
-                cursor.execute(comando_sql)
-            if telefone:
-                comando_sql=f'UPDATE medicos SET telefone="{telefone}" WHERE crm={crm}'
-                cursor.execute(comando_sql)    
-            if endereco:
-                comando_sql=f'UPDATE medicos SET endereco="{endereco}" WHERE crm={crm}'
-                cursor.execute(comando_sql)    
-            if cidade:
-                comando_sql=f'UPDATE medicos SET cidade="{cidade}" WHERE crm={crm}'
-                cursor.execute(comando_sql)    
-            if estado:
-                comando_sql=f'UPDATE medicos SET estado="{estado}" WHERE crm={crm}'
-                cursor.execute(comando_sql)    
-            conexao_banco.commit()
-            resposta = tk.Label(janela, text=f"Médico alterado!", font=fonte, fg="pink")    
+        tipo = campo_tabela  
+        validar = janela.register(limitar_entrada)
+        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
+        entrada.grid(row=i+1, column=1, padx=10, pady=5) #!esse tem q ficar aq
+        entradas[campo_tabela] = entrada
+        
+        if i < len(campos) - 1: #vai ate o penultimo item (pra cada enter ir na proxima caixinha) pra dps chamar a funcao (no else)
+            entrada.bind("<Return>", lambda event, next_widget=campos[i + 1][0]: next_entry(event, entradas[next_widget]))
         else:
-            resposta = tk.Label(janela, text=f"Código não cadastrado!", font=fonte, fg="red")
-    else:
-        resposta=tk.Label(janela, text=f"Faltam informações!", font=fonte, fg="red")
-    resposta.pack(pady=20)
+            entrada.bind("<Return>", lambda _: enviar_alterar(nome, tabela, campos, entradas))
 
+    tk.Button(janela, text="Enviar", bg=ciano, font=fonte, command=lambda: enviar_alterar(nome, tabela, campos, entradas)).grid(row=len(campos) + 1, column=0, columnspan=5, pady=10)
+    tk.Button(janela, text="Voltar", font=fonte, command=alterar, bg=ciano).grid(row=len(campos) + 2, column=0, columnspan=5, pady=10)
+
+def enviar_alterar(nome, tabela, campos, entradas):
+    global resposta
+    if resposta:
+        resposta.destroy()
+
+    erro = False
+
+    valores = {campo: entradas[campo].get().strip() for campo, _ in campos} #_ significa q o segundo valor n vai ser usado, associa um valor digitado pra cada campo em campos
+    #fica tipo assim: valores = {"codigo": "123", "preparo": "Jejum"} valores digitados pelo user
+    codigo = campos[0][0]
+
+    if valores[codigo] and any(valores[campo] for campo in valores if campo != codigo and valores[campo]): #valores[campo] retorna os valores (true/false) e any pega o primeiro true, !=codigo pq ele ja foi verificado antes, and valores[campo] verifica se nao ta vazio
+        cursor.execute(f'SELECT {codigo} FROM {tabela} WHERE {codigo}={valores[codigo]}')
+        resultado = cursor.fetchone()
+
+        if resultado:
+            if tabela != 'consultas':
+                enviar_alteracao(nome, tabela, valores, codigo, campos)
+            else:
+                if resposta:
+                    resposta.destroy()
+
+                if any(valores[campos[4][0]] for campo in valores):
+                    cursor.execute(f'SELECT * FROM medicos where crm={valores[campos[4][0]]}')
+                    checar = cursor.fetchone()
+                    print(checar)
+                    if checar is None:
+                        resposta = tk.Label(janela, text=f"Código do médico não encontrado!", font=fonte, fg="red")
+                        resposta.grid(row=len(campos) + 3, column=0, columnspan=5, pady=10)
+                        erro = True
+
+                if any(valores[campos[5][0]] for campo in valores):
+                    cursor.execute(f'SELECT * FROM exames where codigo={valores[campos[5][0]]}')
+                    checar = cursor.fetchone()
+                    print(checar)
+                    if checar is None:                        
+                        resposta = tk.Label(janela, text=f"Código do exame não encontrado!", font=fonte, fg="red")
+                        resposta.grid(row=len(campos) + 3, column=0, columnspan=5, pady=10)
+                        erro = True
+                if erro:
+                    return
+                else:
+                    enviar_alteracao(nome, tabela, valores, codigo, campos)
+        else:
+            resposta = tk.Label(janela, text=f"Código não encontrado!", font=fonte, fg="red")
+    else:
+        resposta = tk.Label(janela, text="Faltam informações!", font=fonte, fg="red")
+
+    resposta.grid(row=len(campos) + 3, column=0, columnspan=5, pady=10)
+
+def enviar_alteracao(nome, tabela, valores, codigo, campos):
+    global resposta
+    if resposta:
+        resposta.destroy()
+    for campo, valor in valores.items():
+        if valor and campo != codigo:
+            cursor.execute(f'UPDATE {tabela} SET {campo}="{valor}" WHERE {codigo}={valores[codigo]}')
+    conexao_banco.commit()
+    resposta = tk.Label(janela, text=f"{nome} alterado com sucesso!", font=fonte, fg="green")
+    resposta.grid(row=len(campos) + 3, column=0, columnspan=5, pady=10)
      
 def excluir():
     for widget in janela.winfo_children():
         widget.destroy()
 
-    titulo = tk.Label(janela, text="Exclusão de Consulta", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    tk.Label(janela, text="Exclusão de Consulta", font=ftitulo, fg=azulescuro, bg=bege).pack(pady=20)
 
-    codigo = tk.Label(janela, text="Código:", font=fonte)
-    codigo.pack(pady=5)
+    tk.Label(janela, text="Código:", font=fonte).pack(pady=5)
     entrada_codigo = tk.Entry(janela, font=fonte)
     entrada_codigo.pack(pady=5)
 
-    botao_enviar = tk.Button(janela, text="Enviar", bg=azulclaro , font=fonte, 
+    entrada_codigo.bind("<Return>", lambda _: excluir_consultas(entrada_codigo.get()))
+
+    tk.Button(janela, text="Enviar", bg=ciano , font=fonte, 
     command=lambda: excluir_consultas(
         entrada_codigo.get(),
-    ))
-    botao_enviar.pack(pady=10)
+    )).pack(pady=10)
 
-    botao_voltar = tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=azulclaro)
-    botao_voltar.pack(pady=5)
+    tk.Button(janela, text="Voltar", font=fonte, command=menu, bg=ciano).pack(pady=5)
 
 def excluir_consultas(codigo):
     global resposta, botao_sim
@@ -940,7 +364,7 @@ def excluir_consultas(codigo):
     resposta.pack(pady=10)
 
 def confirmacao_exclusao(codigo):
-    global resposta
+    global resposta, botao_sim
     if resposta is not None:
         resposta.destroy()
 
@@ -955,37 +379,37 @@ def confirmacao_exclusao(codigo):
 def visualizar():
     for widget in janela.winfo_children():  
         widget.destroy()
+        
+    label_imagem = tk.Label(janela, image=foto, bg=bege)
+    label_imagem.pack()
 
-    titulo = tk.Label(janela, text="Hospital Ghellere Da Silva Machado", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    tk.Button(janela, bg=ciano, text="Visualizar Exames", font=fonte, command=lambda: visualizacao("Exame", "codigo", "exames", "Código")).pack(pady=10)
 
-    botao_visualizar_e = tk.Button(janela, text="Visualizar Exames", font=fonte, command=lambda: visualizacao("Exame", "codigo", "exames"))
-    botao_visualizar_e.pack(pady=10)
+    tk.Button(janela, bg=ciano, text="Visualizar Pacientes", font=fonte, command=lambda: visualizacao("Paciente", "cpf", "pacientes", "CPF")).pack(pady=10)
 
-    botao_visualizar_p = tk.Button(janela, text="Visualizar Pacientes", font=fonte, command=lambda: visualizacao("Paciente", "cpf", "pacientes"))
-    botao_visualizar_p.pack(pady=10)
+    tk.Button(janela, bg=ciano, text="Visualizar Consultas", font=fonte, command=lambda: visualizacao("Consulta", "codigo", "consultas", "Código")).pack(pady=10)
 
-    botao_visualizar_c = tk.Button(janela, text="Visualizar Consultas", font=fonte, command=lambda: visualizacao("Consulta", "codigo", "consultas"))
-    botao_visualizar_c.pack(pady=10)
+    tk.Button(janela, bg=ciano, text="Visualizar Médico", font=fonte, command=lambda: visualizacao("Médico", "crm", "medicos", "CRM")).pack(pady=10)
+    
+    tk.Button(janela, text="Voltar", font=fonte, bg=ciano, command=menu).pack(pady=10)
 
-    botao_visualizar_m = tk.Button(janela, text="Visualizar Médico", font=fonte, command=lambda: visualizacao("Médico", "crm", "medicos"))
-    botao_visualizar_m.pack(pady=10)
-
-def visualizacao(nome, campo, tabela):
+def visualizacao(nome, campo, tabela, codigo):
     for widget in janela.winfo_children(): 
         widget.destroy()
 
-    titulo = tk.Label(janela, text=f"Visualização de {nome}", font=ftitulo, fg=azulescuro, bg=bege)
-    titulo.pack(pady=20)
+    janela.grid_columnconfigure(0, weight=1)
+    janela.grid_columnconfigure(2, weight=1) 
 
-    codigo = tk.Label(janela, text="Código:", font=fonte) 
-    codigo.pack(pady=5)
-    
-    entrada_codigo = tk.Entry(janela, font=fonte) 
-    entrada_codigo.pack(pady=5)
+    tk.Label(janela, text=f"Visualização de {nome}", font=ftitulo, fg=azulescuro, bg=bege).grid(row=0, column=0, columnspan=5, pady=60)
+
+    tk.Label(janela, text=f"{codigo}:", font=fonte).grid(row=1, column=0, sticky='e', pady=15)   
+    entrada_codigo = tk.Entry(janela, font=fonte)
+    entrada_codigo.grid(row=1, column=1, padx=10, pady=5, sticky='we')
+
+    infos=[]
 
     def enviar():
-        global resposta, infos
+        global resposta
         for info in infos:
             info.destroy()
         infos.clear()
@@ -994,14 +418,13 @@ def visualizacao(nome, campo, tabela):
 
         codigo = entrada_codigo.get()   #pega o codigo
         
-        if codigo.strip():  #ver se eh um numero msm
+        if codigo.strip():
             comando_sql = f"SELECT * FROM {tabela} WHERE {campo} = {codigo}"
             cursor.execute(comando_sql)
             item = cursor.fetchone() #pega o primeiro item encontrado (codigo)
             #verifica o codigo
             if item:
-                resposta = tk.Label(janela, text=f"Detalhes:", font=fonte, fg="blue")
-                resposta.pack(pady=10)
+                resposta = tk.Label(janela, text=f"Detalhes:", font=fonte, fg="blue").grid(row=4, column=0, columnspan=5, pady=10, padx=50)
                 # pegando de cada tabela os itens e armazenando numa lista+tupla
                 if tabela == 'medicos':
                     lista = [
@@ -1043,31 +466,25 @@ def visualizacao(nome, campo, tabela):
                         ("Código Médico", item[5]),
                         ("Código Exame", item[6]),
                     ]
-
-                # Exibe as informações de cada campo
-                for chave, valor in lista: #pega os bagulhos da lista
+                for i, (chave, valor) in enumerate(lista): #pega os bagulhos da lista
                     info = tk.Label(janela, text=f"{chave}: {valor}", font=fonte)
-                    info.pack(pady=5) #esse label mostra os itens 
+                    info.grid(row=i+5, column=0, columnspan=5, pady=10, padx=50)#esse label mostra os itens 
                     infos.append(info)
-
             else:
                 resposta = tk.Label(janela, text=f"Não encontrado {tabela} com este código", fg="red", font=fonte)
+                resposta.grid(row=4, column=0, columnspan=5, pady=10, padx=50)
         else:
             resposta = tk.Label(janela, text="Por favor, insira um código válido.", fg="red", font=fonte)
-        resposta.pack(pady=10) 
+            resposta.grid(row=4, column=0, columnspan=5, pady=10, padx=50)
 
-    #botao enviar padrao
-    enviar_botao = tk.Button(janela, text="Enviar", font=fonte, command=enviar)
-    enviar_botao.pack(pady=10)
+    entrada_codigo.bind("<Return>", lambda _: enviar())
 
-    voltar_botao = tk.Button(janela, text="Voltar", font=fonte, command=menu)
-    voltar_botao.pack(pady=10)
+    tk.Button(janela, text="Enviar", font=fonte, command=enviar, bg=ciano).grid(row=2, column=0, columnspan=5, pady=10)
 
-
+    tk.Button(janela, text="Voltar", font=fonte, command=visualizar, bg=ciano).grid(row=3, column=0, columnspan=5, pady=10)
 
 menu()
 
 janela.mainloop()
-
 cursor.close()
 conexao_banco.close()
