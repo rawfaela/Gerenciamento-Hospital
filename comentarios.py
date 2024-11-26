@@ -1,8 +1,8 @@
 
 import mysql.connector
 import tkinter as tk
-from tkinter import font
-from PIL import Image, ImageTk
+from tkinter import font #funçao de mudar de fonte do tkinter
+from PIL import Image, ImageTk #pil eh a biblioteca principal do python de imagens , importando dela 'image' para ver a imagem e dps o 'imagetk' que vai ser usado para colocar a imagem como widget
 
 conexao_banco = mysql.connector.connect(
     host="localhost",
@@ -22,7 +22,7 @@ janela.configure(background=bege)
 
 imagem = Image.open("logo2.png")
 imagem = imagem.resize((370, 278))
-foto = ImageTk.PhotoImage(imagem)
+foto = ImageTk.PhotoImage(imagem) #criando a variavel e transformando ela numa imagem que o tkinter possa ler
 
 fonte = font.Font(family="Arial", size=20)
 ftitulo = font.Font(family="Arial", size=25, weight="bold")
@@ -30,49 +30,49 @@ ftitulo = font.Font(family="Arial", size=25, weight="bold")
 resposta = None  
 botao_sim = None 
 
-def limitar_entrada(valor, tipo, campo): # valor: vai ser validado, tipo: o conjunto que tem os campos
+def limitar_entrada(valor, campo): # valor: vai ser validado, campo: condicao 
     if valor == "":  # se tiver vazio
         return True
 
-    elif tipo in ('codigo', 'crm', 'codpaciente', 'codmedico', 'codexame'): # tem que ser 'tipo in' e nao == porque quando utiliza = sempre vai retornar false, porque TIPO é uma string e nunca será igual a uma tupla inteira
-        if valor.isdigit(): 
+    elif campo in ('codigo', 'crm', 'codpaciente', 'codmedico', 'codexame'): # tem que ser 'campo in' e nao == porque quando utiliza = sempre vai retornar false, porque CAMPO é uma string e nunca será igual a uma tupla inteira
+        if valor.isdigit(): #se for numero
             return True
         return False
 
-    elif tipo in ('cpf', 'telefone'):
-        if valor.isdigit() and len(valor) <= 11:
+    elif campo in ('cpf', 'telefone'):
+        if valor.isdigit() and len(valor) <= 11: #comprimento menor igual 11
             return True
         return False
 
-    elif tipo in ('datanasc', 'data'):
+    elif campo in ('datanasc', 'data'):
         if valor.isdigit() and len(valor) <= 8:
             return True  
         return False
 
-    elif tipo == 'estado':
+    elif campo == 'estado':
         if valor.isalpha() and len(valor) <= 2: 
             return True
         return False
     
-    elif tipo in ('cidade','nome','especialidade'):
-        if valor.isalpha() or " " in valor:
+    elif campo in ('cidade','nome','especialidade'):
+        if valor.isalpha() or " " in valor:  #se for APENAS letras ou espaço
             return True
         return False
 
-    elif tipo in ('sexo', 'estadocivil'):
+    elif campo in ('sexo', 'estadocivil'):
         if valor.isalpha():
             return True
         return False
 
-    elif tipo == 'hora':
-        if (valor.isdigit() or ':' in valor) and len(valor) <= 5:  
+    elif campo == 'hora':
+        if (valor.isdigit() or ':' in valor) and len(valor) <= 5: #se for numero ou tiver :
             return True
         return False
 
     return True # alguns nao presicam de verificacao
 
 def menu():
-    for widget in janela.winfo_children():
+    for widget in janela.winfo_children(): #winfo_children() ele pega os 'filhos' da janela principal (que seriam botoes,label..etc) e destroem eles com o widget.destroy() abaixo, resumo: limpa tudo da janela para quando for em interface
         widget.destroy()
         
     label_imagem = tk.Label(janela, image=foto, bg=bege)
@@ -95,7 +95,7 @@ def cadastrar():
 
     tk.Button(janela, text="Cadastrar Exames", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Exame", [("codigo", "Código"), ("descricao", "Descrição"), ("tipo", "Tipo"), ("preparo", "Preparo"), ("pos_exame", "Pós Exame")], "exames")).pack(pady=10)
     #nome: exame, campos:[codigo...pos exame], tabela: exames
-
+    #primeiro nome 'Exame', segundo uma lista com tupla que tem dentro o primeiro que vai ser usado no sql e o outro na hora de mostrar na interface, no final a tabela do sql 'exames'
     tk.Button(janela, text="Cadastrar Pacientes", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Paciente", [("cpf", "CPF"), ("nome", "Nome"), ("telefone", "Telefone"), ("endereco", "Endereço"), ("cidade", "Cidade"), ("estado", "Estado"), ("sexo", "Sexo"), ("datanasc", "Data de nascimento"), ("estadocivil", "Estado Civil")], "pacientes")).pack(pady=10)
 
     tk.Button(janela, text="Cadastrar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Consulta", [("codigo", "Código"), ("tipo", "Tipo"), ("data", "Data"), ("hora", "Hora"), ("codpaciente", "CPF do paciente"), ("codmedico", "CRM do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
@@ -109,29 +109,30 @@ def cadastro(nome, campos, tabela):
     for widget in janela.winfo_children():
         widget.destroy()
         
-    global resposta
+    global resposta #criando essa variavel global que de para modificar e dar avisos ("ex: aviso de erro no codigo")
     if resposta:
         resposta.destroy()
 
     janela.grid_columnconfigure(0, weight=1) #coluna 0 tem peso 1 (se redimensiona de acordo com o tamanho da janela com 1 de espaco extra)
     janela.grid_columnconfigure(2, weight=1) 
 
-    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=1, pady=50, padx=100)
+    tk.Label(janela, text=f"Cadastro de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=1, pady=50, padx=150) #criando o label de titulo para mostrar qual o nome do tipo de cadastro que ta sendo utilizado, o nome vem do button la de cima do cadastrar, o primeiro nome que vem depois do comando lambda eh o que vai ser inserido no nome
 
-    entradas = {}
+    entradas = {} #dicionario de entrada vazio, que vai ter como chave o campo eo valor o entry que vai ser a seguir (ex: {{"cpf": <Entry CPF>})
 
     def next_entry(event, next_widget):
-        next_widget.focus()
+        next_widget.focus() #isso eh para quando clicar enter va para o proximo widget de entry
 
     for i, (campo_tabela, campo_nome) in enumerate(campos): #i é usado no if i<len nao agora, enumerate p iterar sobre campos dando dois elementos cada vez (indice e tupla com tabela e nome)
-        tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15) #i+1 pq vai aumentando a linha a cada for
-    
-        tipo = campo_tabela  
-        validar = janela.register(limitar_entrada)
+        #campo tabela eh o q vai ser do sql e o campo nome e o bonitinho que vai aparecer na interface
 
-        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
+        tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15) #i+1 pq vai aumentando a linha a cada for, vai cria aqui o label com o campo nome (ex: "CPF: ____")
+    
+        validar = janela.register(limitar_entrada) #coloca dentro d variavel validar a função de limitar a entrada e registra aq msm
+
+        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', campo_tabela))#caixa de entrada eh criada e com ela tem o comando de verificar ali com o validatecommand, e o %P representa o novo valor que foi colocado dps da verifcação, o campo_tabela eh oq tem no banco, que vai ser verificado na funcao
         entrada.grid(row=i+1, column=1, padx=10, pady=5, sticky='we') 
-        entradas[campo_tabela] = entrada #na chave campo tabela o valor é entrada
+        entradas[campo_tabela] = entrada #na chave campo tabela o valor é entrada, cada entry vai adicionando no dic, usando o campo_tabela como chave, vai servir para acessar o widget dps
 
         if i < len(campos) - 1: #vai ate o penultimo item (pra cada enter ir na proxima caixinha) pra dps chamar a funcao (no else)
             entrada.bind("<Return>", lambda event, next_widget=campos[i + 1][0]: next_entry(event, entradas[next_widget])) #return é enter, o proximo widget a ser o foco é o do campos na posicao i+1 (segundo item, 3, 4...), chama a funcao com o evento (enter) e as entradas na chave next_widget(definida antes)
@@ -241,9 +242,8 @@ def alteracao(nome, campos, tabela):
     for i, (campo_tabela, campo_nome) in enumerate(campos): #i é usado no if i<len, nao agora, enumerate p iterar sobre campos dando dois elementos cada vez (indice e tupla com tabela e nome)
         tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)
 
-        tipo = campo_tabela  
         validar = janela.register(limitar_entrada)
-        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
+        entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', campo_tabela))
         entrada.grid(row=i+1, column=1, padx=10, pady=5)
         entradas[campo_tabela] = entrada
         
@@ -318,10 +318,12 @@ def excluir():
     for widget in janela.winfo_children():
         widget.destroy()
 
+    validar = janela.register(limitar_entrada)
+
     tk.Label(janela, text="Exclusão de Consulta", font=ftitulo, fg=azul, bg=bege).pack(pady=20)
 
     tk.Label(janela, text="Código:", font=fonte).pack(pady=5)
-    entrada_codigo = tk.Entry(janela, font=fonte)
+    entrada_codigo = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', "codigo"))
     entrada_codigo.pack(pady=5)
 
     entrada_codigo.bind("<Return>", lambda _: excluir_consultas(entrada_codigo.get())) #quando aperta enter (return) vai pra funcao
@@ -335,7 +337,7 @@ def excluir():
 
 def excluir_consultas(codigo):
     global resposta, botao_sim
-    if resposta is not None:
+    if resposta:
         resposta.destroy()
 
     if codigo.strip(): 
@@ -345,7 +347,7 @@ def excluir_consultas(codigo):
         if consultas:
             data = consultas[2]  
             tipo = consultas[1]
-            if botao_sim is not None:
+            if botao_sim:
                 botao_sim.destroy()
             resposta = tk.Label(janela, text=f"Você tem certeza que deseja excluir a consulta que está agendada para {data} do tipo {tipo}?", font=fonte, fg="blue")
 
@@ -359,7 +361,7 @@ def excluir_consultas(codigo):
 
 def confirmacao_exclusao(codigo):
     global resposta, botao_sim
-    if resposta is not None:
+    if resposta:
         resposta.destroy()
 
     comando_sql = f"DELETE FROM consultas WHERE codigo = {codigo}"
@@ -394,10 +396,12 @@ def visualizacao(nome, campo, tabela, codigo):
     janela.grid_columnconfigure(0, weight=1)
     janela.grid_columnconfigure(2, weight=1) 
 
+    validar = janela.register(limitar_entrada)
+
     tk.Label(janela, text=f"Visualização de {nome}", font=ftitulo, fg=azul, bg=bege).grid(row=0, column=0, columnspan=5, pady=60)
 
     tk.Label(janela, text=f"{codigo}:", font=fonte).grid(row=1, column=0, sticky='e', pady=15)   
-    entrada_codigo = tk.Entry(janela, font=fonte)
+    entrada_codigo = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', campo))
     entrada_codigo.grid(row=1, column=1, padx=10, pady=5, sticky='we')
 
     infos=[]
@@ -407,7 +411,7 @@ def visualizacao(nome, campo, tabela, codigo):
         for info in infos: # cada widget na lista infos é destruído
             info.destroy()
         infos.clear() #limpa a lista
-        if resposta is not None:
+        if resposta:
             resposta.destroy() 
 
         codigo = entrada_codigo.get()   #pega o codigo
