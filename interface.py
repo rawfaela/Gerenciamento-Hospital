@@ -20,7 +20,7 @@ ciano = '#0087A0'
 azulescuro = '#336182'
 
 janela = tk.Tk()
-janela.state("zoomed") #tela cheia
+janela.state("zoomed")
 janela.configure(background=bege)
 
 imagem = Image.open("logo2.png")
@@ -34,13 +34,13 @@ resposta = None
 botao_sim = None 
 infos = []
 
-def limitar_entrada(P, tipo, campo): #!p eh o valor que vai ser validado e o tipo vai ser o conjunto que tem os campos
+def limitar_entrada(P, tipo, campo):
     valor = P
     if valor == "":  
         return True
 
     elif tipo in ('codigo', 'crm', 'codpaciente', 'codmedico', 'codexame'):
-        if valor.isdigit(): #tem que ser 'tipo in' e nao  == porque quando utiliza = sempre vai retornar false, porque TIPO é uma string e nunca será igual a uma tupla inteira
+        if valor.isdigit(): 
             return True
         return False
 
@@ -127,17 +127,17 @@ def cadastro(nome, campos, tabela):
     def next_entry(event, next_widget):
         next_widget.focus()
 
-    for i, (campo_tabela, campo_nome) in enumerate(campos): #i é usado no if i<len, nao agora, enumerate p iterar sobre campos dando dois elementos cada vez (indice e tupla com tabela e nome)
+    for i, (campo_tabela, campo_nome) in enumerate(campos):
         tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)   
     
         tipo = campo_tabela  
         validar = janela.register(limitar_entrada)
 
         entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
-        entrada.grid(row=i+1, column=1, padx=10, pady=5, sticky='we') #!esse tem q ficar aq
+        entrada.grid(row=i+1, column=1, padx=10, pady=5, sticky='we')
         entradas[campo_tabela] = entrada
 
-        if i < len(campos) - 1: #vai ate o penultimo item (pra cada enter ir na proxima caixinha) pra dps chamar a funcao (no else)
+        if i < len(campos) - 1:
             entrada.bind("<Return>", lambda event, next_widget=campos[i + 1][0]: next_entry(event, entradas[next_widget]))
         else:
             entrada.bind("<Return>", lambda _: enviar_cadastro(nome, tabela, campos, entradas))
@@ -152,11 +152,10 @@ def enviar_cadastro(nome, tabela, campos, entradas):
 
     erro = False
 
-    valores = {campo: entradas[campo].get().strip() for campo, _ in campos} #_ significa q o segundo valor n vai ser usado, associa um valor digitado pra cada campo em campos
-    #fica tipo assim: valores = {"codigo": "123", "preparo": "Jejum"} valores digitados pelo user
+    valores = {campo: entradas[campo].get().strip() for campo, _ in campos}
 
-    if all(valores[campo] for campo in valores): #se todos foram preenchidos
-        codigo = campos[0][0] #codigo, crm ou cpf
+    if all(valores[campo] for campo in valores): 
+        codigo = campos[0][0]
         comando_sql = f'SELECT * FROM {tabela} WHERE {codigo} = "{valores[codigo]}"'
         cursor.execute(comando_sql)
         resultado = cursor.fetchall()
@@ -199,11 +198,11 @@ def enviar_cadastro(nome, tabela, campos, entradas):
     resposta.grid(row=len(campos)+3, column=1, pady=10)
     
 def enviar_cadastrar(nome, tabela, valores, campos):
-    comando_sql = f"INSERT INTO {tabela} ({', '.join([campo for campo, _ in campos])}) VALUES ({', '.join([repr(valores[campo]) for campo, _ in campos])})" #pega o 1 valor de cada tupla na lista campos e junta numa string separada por virgulas, repr formata os valores (digt pelo user) pro sql (str entre aspas)
+    comando_sql = f"INSERT INTO {tabela} ({', '.join([campo for campo, _ in campos])}) VALUES ({', '.join([repr(valores[campo]) for campo, _ in campos])})"
     cursor.execute(comando_sql)
     conexao_banco.commit()
     
-    descricao = valores[campos[1][0]] #segundo item de campos na posicao 0 (segunda coluna do sql) digitado pelo user
+    descricao = valores[campos[1][0]]
     resposta = tk.Label(janela, text=f"{nome} {descricao} cadastrado!", font=fonte, fg="green")
     resposta.grid(row=len(campos)+3, column=1, pady=10)
 
@@ -242,16 +241,16 @@ def alteracao(nome, campos, tabela):
     def next_entry(event, next_widget):
         next_widget.focus()
 
-    for i, (campo_tabela, campo_nome) in enumerate(campos): #i é usado no if i<len, nao agora, enumerate p iterar sobre campos dando dois elementos cada vez (indice e tupla com tabela e nome)
+    for i, (campo_tabela, campo_nome) in enumerate(campos):
         tk.Label(janela, text=f"{campo_nome}:", font=fonte).grid(row=i+1, column=0, sticky='e', padx=10, pady=15)
 
         tipo = campo_tabela  
         validar = janela.register(limitar_entrada)
         entrada = tk.Entry(janela, font=fonte, validate="key", validatecommand=(validar, '%P', tipo, campo_tabela))
-        entrada.grid(row=i+1, column=1, padx=10, pady=5) #!esse tem q ficar aq
+        entrada.grid(row=i+1, column=1, padx=10, pady=5) 
         entradas[campo_tabela] = entrada
         
-        if i < len(campos) - 1: #vai ate o penultimo item (pra cada enter ir na proxima caixinha) pra dps chamar a funcao (no else)
+        if i < len(campos) - 1:
             entrada.bind("<Return>", lambda event, next_widget=campos[i + 1][0]: next_entry(event, entradas[next_widget]))
         else:
             entrada.bind("<Return>", lambda _: enviar_alterar(nome, tabela, campos, entradas))
@@ -266,11 +265,10 @@ def enviar_alterar(nome, tabela, campos, entradas):
 
     erro = False
 
-    valores = {campo: entradas[campo].get().strip() for campo, _ in campos} #_ significa q o segundo valor n vai ser usado, associa um valor digitado pra cada campo em campos
-    #fica tipo assim: valores = {"codigo": "123", "preparo": "Jejum"} valores digitados pelo user
+    valores = {campo: entradas[campo].get().strip() for campo, _ in campos}
     codigo = campos[0][0]
 
-    if valores[codigo] and any(valores[campo] for campo in valores if campo != codigo and valores[campo]): #valores[campo] retorna os valores (true/false) e any pega o primeiro true, !=codigo pq ele ja foi verificado antes, and valores[campo] verifica se nao ta vazio
+    if valores[codigo] and any(valores[campo] for campo in valores if campo != codigo and valores[campo]):
         cursor.execute(f'SELECT {codigo} FROM {tabela} WHERE {codigo}={valores[codigo]}')
         resultado = cursor.fetchone()
 
@@ -416,16 +414,14 @@ def visualizacao(nome, campo, tabela, codigo):
         if resposta is not None:
             resposta.destroy()
 
-        codigo = entrada_codigo.get()   #pega o codigo
+        codigo = entrada_codigo.get()  
         
         if codigo.strip():
             comando_sql = f"SELECT * FROM {tabela} WHERE {campo} = {codigo}"
             cursor.execute(comando_sql)
-            item = cursor.fetchone() #pega o primeiro item encontrado (codigo)
-            #verifica o codigo
+            item = cursor.fetchone()
             if item:
                 resposta = tk.Label(janela, text=f"Detalhes:", font=fonte, fg="blue").grid(row=4, column=0, columnspan=5, pady=10, padx=50)
-                # pegando de cada tabela os itens e armazenando numa lista+tupla
                 if tabela == 'medicos':
                     lista = [
                         ("CRM", item[0]),
@@ -453,8 +449,8 @@ def visualizacao(nome, campo, tabela, codigo):
                         ("Código", item[0]),
                         ("Descrição", item[1]),
                         ("Tipo", item[2]),
-                        ("Preparo", item[3] if item[3] else "Nenhum"),  #  else para campo vazio
-                        ("Pós Exame", item[4] if item[4] else "Nenhum"),  # else para campo vazio
+                        ("Preparo", item[3] if item[3] else "Nenhum"), 
+                        ("Pós Exame", item[4] if item[4] else "Nenhum"), 
                     ]
                 elif tabela == 'consultas':
                     lista = [
@@ -466,9 +462,9 @@ def visualizacao(nome, campo, tabela, codigo):
                         ("Código Médico", item[5]),
                         ("Código Exame", item[6]),
                     ]
-                for i, (chave, valor) in enumerate(lista): #pega os bagulhos da lista
+                for i, (chave, valor) in enumerate(lista):
                     info = tk.Label(janela, text=f"{chave}: {valor}", font=fonte)
-                    info.grid(row=i+5, column=0, columnspan=5, pady=10, padx=50)#esse label mostra os itens 
+                    info.grid(row=i+5, column=0, columnspan=5, pady=10, padx=50) 
                     infos.append(info)
             else:
                 resposta = tk.Label(janela, text=f"Não encontrado {tabela} com este código", fg="red", font=fonte)
