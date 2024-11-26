@@ -480,7 +480,4 @@ def visualizacao(nome, campo, tabela, codigo):
     tk.Button(janela, text="Voltar", font=fonte, command=visualizar, bg=ciano).grid(row=3, column=0, columnspan=5, pady=10)
 
 menu()
-
 janela.mainloop()
-cursor.close()
-conexao_banco.close()
