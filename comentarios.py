@@ -1,4 +1,3 @@
-
 import mysql.connector
 import tkinter as tk
 from tkinter import font #funçao de mudar de fonte do tkinter
@@ -59,8 +58,13 @@ def limitar_entrada(valor, campo): # valor: vai ser validado, campo: condicao
             return True
         return False
 
-    elif campo in ('sexo', 'estadocivil'):
+    elif campo == 'estadocivil':
         if valor.isalpha():
+            return True
+        return False
+
+    elif campo == 'sexo':
+        if valor.isalpha() and valor == 1:
             return True
         return False
 
@@ -215,7 +219,7 @@ def alterar():
 
     tk.Button(janela, text="Alterar Pacientes", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Paciente", [("cpf", "CPF"), ("nome", "Nome"), ("telefone", "Telefone"), ("endereco", "Endereço"), ("cidade", "Cidade"), ("estado", "Estado"), ("estadocivil", "Estado Civil")], "pacientes")).pack(pady=10)
 
-    tk.Button(janela, text="Alterar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Consulta", [("codigo", "Código"), ("data", "Data"), ("hora", "Hora"), ("tipo", "Tipo"), ("codmedico", "CRM do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
+    tk.Button(janela, text="Alterar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Consulta", [("codigo", "Código"), ("tipo", "Tipo"), ("data", "Data"), ("hora", "Hora"), ("codmedico", "CRM do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
 
     tk.Button(janela, text="Alterar Médicos", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Médico", [("crm","CRM"),("nome","Nome"),("telefone","Telefone"), ("endereco","Endereço"),("cidade","Cidade"),("estado","Estado")], "medicos")).pack(pady=10) 
 
