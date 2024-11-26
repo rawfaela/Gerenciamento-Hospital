@@ -1,4 +1,3 @@
-
 import mysql.connector
 import tkinter as tk
 from tkinter import font
@@ -30,8 +29,7 @@ ftitulo = font.Font(family="Arial", size=25, weight="bold")
 resposta = None  
 botao_sim = None 
 
-def limitar_entrada(P, tipo, campo):
-    valor = P
+def limitar_entrada(valor, tipo, campo):
     if valor == "":  
         return True
 
@@ -66,7 +64,7 @@ def limitar_entrada(P, tipo, campo):
         return False
 
     elif tipo == 'hora':
-        if valor.isdigit() and len(valor) <= 4:  
+        if (valor.isdigit() or ':' in valor) and len(valor) <= 5:  
             return True
         return False
 
@@ -98,7 +96,7 @@ def cadastrar():
 
     tk.Button(janela, text="Cadastrar Pacientes", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Paciente", [("cpf", "CPF"), ("nome", "Nome"), ("telefone", "Telefone"), ("endereco", "Endereço"), ("cidade", "Cidade"), ("estado", "Estado"), ("sexo", "Sexo"), ("datanasc", "Data de nascimento"), ("estadocivil", "Estado Civil")], "pacientes")).pack(pady=10)
 
-    tk.Button(janela, text="Cadastrar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Consulta", [("codigo", "Código"), ("tipo", "Tipo"), ("data", "Data"), ("hora", "Hora"), ("codpaciente", "Código do paciente"), ("codmedico", "Código do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
+    tk.Button(janela, text="Cadastrar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Consulta", [("codigo", "Código"), ("tipo", "Tipo"), ("data", "Data"), ("hora", "Hora"), ("codpaciente", "CPF do paciente"), ("codmedico", "CRM do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
 
     tk.Button(janela, text="Cadastrar Médicos", font=fonte, bg=ciano, fg="black", command=lambda: cadastro("Médico", [("crm","CRM"),("nome","Nome"),("telefone","Telefone"), ("endereco","Endereço"),("cidade","Cidade"),("estado","Estado"), ("especialidade", "Especialidade")], "medicos")).pack(pady=10)    
 
@@ -213,7 +211,7 @@ def alterar():
 
     tk.Button(janela, text="Alterar Pacientes", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Paciente", [("cpf", "CPF"), ("nome", "Nome"), ("telefone", "Telefone"), ("endereco", "Endereço"), ("cidade", "Cidade"), ("estado", "Estado"), ("estadocivil", "Estado Civil")], "pacientes")).pack(pady=10)
 
-    tk.Button(janela, text="Alterar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Consulta", [("codigo", "Código"), ("data", "Data"), ("hora", "Hora"), ("tipo", "Tipo"), ("codmedico", "Código do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
+    tk.Button(janela, text="Alterar Consultas", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Consulta", [("codigo", "Código"), ("data", "Data"), ("hora", "Hora"), ("tipo", "Tipo"), ("codmedico", "CRM do médico"), ("codexame", "Código do exame")], "consultas")).pack(pady=10)
 
     tk.Button(janela, text="Alterar Médicos", font=fonte, bg=ciano, fg="black", command=lambda: alteracao("Médico", [("crm","CRM"),("nome","Nome"),("telefone","Telefone"), ("endereco","Endereço"),("cidade","Cidade"),("estado","Estado")], "medicos")).pack(pady=10) 
 
@@ -275,19 +273,17 @@ def enviar_alterar(nome, tabela, campos, entradas):
                 if resposta:
                     resposta.destroy()
 
-                if any(valores[campos[4][0]] for campo in valores):
+                if valores[campos[4][0]]:
                     cursor.execute(f'SELECT * FROM medicos where crm={valores[campos[4][0]]}')
                     checar = cursor.fetchone()
-                    print(checar)
                     if checar is None:
                         resposta = tk.Label(janela, text=f"Código do médico não encontrado!", font=fonte, fg="red")
                         resposta.grid(row=len(campos) + 3, column=0, columnspan=5, pady=10)
                         erro = True
 
-                if any(valores[campos[5][0]] for campo in valores):
+                if valores[campos[5][0]]:
                     cursor.execute(f'SELECT * FROM exames where codigo={valores[campos[5][0]]}')
                     checar = cursor.fetchone()
-                    print(checar)
                     if checar is None:                        
                         resposta = tk.Label(janela, text=f"Código do exame não encontrado!", font=fonte, fg="red")
                         resposta.grid(row=len(campos) + 3, column=0, columnspan=5, pady=10)
@@ -343,11 +339,11 @@ def excluir_consultas(codigo):
         cursor.execute(comando_sql)
         consultas = cursor.fetchone()
         if consultas:
-            data = consultas[1]  
-            tipo = consultas[3]
+            data = consultas[2]  
+            tipo = consultas[1]
             if botao_sim is not None:
                 botao_sim.destroy()
-            resposta = tk.Label(janela, text=f"Você tem certeza que deseja excluir a consulta que está agendada para {data}, do tipo {tipo}?", font=fonte, fg="blue")
+            resposta = tk.Label(janela, text=f"Você tem certeza que deseja excluir a consulta que está agendada para {data} do tipo {tipo}?", font=fonte, fg="blue")
 
             botao_sim = tk.Button(janela, text="Sim", font=fonte, bg="green", fg="white", command=lambda: confirmacao_exclusao(codigo))
             botao_sim.pack(pady=10)
@@ -476,7 +472,4 @@ def visualizacao(nome, campo, tabela, codigo):
     tk.Button(janela, text="Voltar", font=fonte, command=visualizar, bg=ciano).grid(row=3, column=0, columnspan=5, pady=10)
 
 menu()
-
 janela.mainloop()
-cursor.close()
-conexao_banco.close()
