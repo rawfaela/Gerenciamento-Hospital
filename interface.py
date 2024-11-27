@@ -196,6 +196,10 @@ def enviar_cadastro(nome, tabela, campos, entradas):
     resposta.grid(row=len(campos)+3, column=1, pady=10)
     
 def enviar_cadastrar(nome, tabela, valores, campos):
+    global resposta
+    if resposta:
+        resposta.destroy()
+        
     comando_sql = f"INSERT INTO {tabela} ({', '.join([campo for campo, _ in campos])}) VALUES ({', '.join([repr(valores[campo]) for campo, _ in campos])})"
     cursor.execute(comando_sql)
     conexao_banco.commit()
@@ -440,8 +444,8 @@ def visualizacao(nome, campo, tabela, codigo):
                         ("Cidade", item[4]),
                         ("Estado", item[5]),
                         ("Sexo", item[6]),
-                        ("Data de Nascimento", item[7]),
-                        ("Estado Civil", item[8]),
+                        ("Data de nascimento", item[7]),
+                        ("Estado civil", item[8]),
                     ]
                 elif tabela == 'exames':
                     lista = [
@@ -449,24 +453,24 @@ def visualizacao(nome, campo, tabela, codigo):
                         ("Descrição", item[1]),
                         ("Tipo", item[2]),
                         ("Preparo", item[3] if item[3] else "Nenhum"), 
-                        ("Pós Exame", item[4] if item[4] else "Nenhum"), 
+                        ("Pós-exame", item[4] if item[4] else "Nenhum"), 
                     ]
                 elif tabela == 'consultas':
                     lista = [
                         ("Código", item[0]),
-                        ("Data", item[1]),
-                        ("Hora", item[2]),
-                        ("Tipo", item[3]),
-                        ("Código Paciente", item[4]),
-                        ("Código Médico", item[5]),
-                        ("Código Exame", item[6]),
+                        ("Tipo", item[1]),
+                        ("Data", item[2]),
+                        ("Hora", item[3]),
+                        ("Código do paciente", item[4]),
+                        ("Código do médico", item[5]),
+                        ("Código do exame", item[6]),
                     ]
                 for i, (chave, valor) in enumerate(lista):
                     info = tk.Label(janela, text=f"{chave}: {valor}", font=fonte)
                     info.grid(row=i+5, column=0, columnspan=5, pady=10, padx=50) 
                     infos.append(info)
             else:
-                resposta = tk.Label(janela, text=f"Não encontrado {tabela} com este código", fg="red", font=fonte)
+                resposta = tk.Label(janela, text=f"Não encontrado {nome.lower()} com este código!", fg="red", font=fonte)
                 resposta.grid(row=4, column=0, columnspan=5, pady=10, padx=50)
         else:
             resposta = tk.Label(janela, text="Por favor, insira um código válido.", fg="red", font=fonte)
