@@ -64,7 +64,7 @@ def limitar_entrada(valor, campo): # valor: vai ser validado, campo: condicao
         return False
 
     elif campo == 'sexo':
-        if valor.isalpha() and valor == 1:
+        if valor.isalpha() and len(valor) == 1:
             return True
         return False
 
