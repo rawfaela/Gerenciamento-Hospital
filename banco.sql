@@ -29,8 +29,8 @@ create table exames(
     codigo              int(5)         not null,
     descricao           varchar(500)   not null,
     tipo                varchar(500)   not null,
-    preparo             varchar(500),
-    pos_exame           varchar(500),
+    preparo             varchar(500)   not null,
+    pos_exame           varchar(500)   not null,
     primary key (codigo)
 );
 
