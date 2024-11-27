@@ -18,6 +18,7 @@ azul = '#336182'
 janela = tk.Tk()
 janela.state("zoomed")
 janela.configure(background=bege)
+janela.title("Hospital Ghellere Da Silva Machado")
 
 imagem = Image.open("logo2.png")
 imagem = imagem.resize((370, 278))
