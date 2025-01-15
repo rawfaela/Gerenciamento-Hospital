@@ -153,47 +153,63 @@ def enviar_cadastro(nome, tabela, campos, entradas):
 
     valores = {campo: entradas[campo].get().strip() for campo, _ in campos}
 
-    if all(valores[campo] for campo in valores): 
-        codigo = campos[0][0]
-        comando_sql = f'SELECT * FROM {tabela} WHERE {codigo} = "{valores[codigo]}"'
-        cursor.execute(comando_sql)
-        resultado = cursor.fetchall()
+        if tabela != 'exames':
+        if all(valores[campo] for campo in valores): 
+            codigo = campos[0][0]
+            comando_sql = f'SELECT * FROM {tabela} WHERE {codigo} = "{valores[codigo]}"'
+            cursor.execute(comando_sql)
+            resultado = cursor.fetchall()
 
-        if resultado:
-            resposta = tk.Label(janela, text="Código já cadastrado!", font=fonte, fg="red")
-        else:
-            if resposta:
-                resposta.destroy()
-
-            if tabela != 'consultas':
-                enviar_cadastrar(nome, tabela, valores, campos)
+            if resultado:
+                resposta = tk.Label(janela, text="Código já cadastrado!", font=fonte, fg="red")
             else:
-                cursor.execute(f'SELECT * FROM pacientes where cpf={valores[campos[4][0]]}')
-                checar = cursor.fetchone()
-                if checar is None:
-                    resposta = tk.Label(janela, text=f"Código do paciente não encontrado!", font=fonte, fg="red")
-                    resposta.grid(row=len(campos)+3, column=1, pady=10)
-                    erro = True
+                if resposta:
+                    resposta.destroy()
 
-                cursor.execute(f'SELECT * FROM medicos where crm={valores[campos[5][0]]}')
-                checar = cursor.fetchone()
-                if checar is None:
-                    resposta = tk.Label(janela, text=f"Código do médico não encontrado!", font=fonte, fg="red")
-                    resposta.grid(row=len(campos)+3, column=1, pady=10)
-                    erro = True
-
-                cursor.execute(f'SELECT * FROM exames where codigo={valores[campos[6][0]]}')
-                checar = cursor.fetchone()
-                if checar is None:                        
-                    resposta = tk.Label(janela, text=f"Código do exame não encontrado!", font=fonte, fg="red")
-                    resposta.grid(row=len(campos)+3, column=1, pady=10)
-                    erro = True
-                if erro:
-                    return
-                else:
+                if tabela != 'consultas':
                     enviar_cadastrar(nome, tabela, valores, campos)
+                else:
+                    cursor.execute(f'SELECT * FROM pacientes where cpf={valores[campos[4][0]]}')
+                    checar = cursor.fetchone()
+                    if checar is None:
+                        resposta = tk.Label(janela, text=f"Código do paciente não encontrado!", font=fonte, fg="red")
+                        resposta.grid(row=len(campos)+3, column=1, pady=10)
+                        erro = True
+
+                    cursor.execute(f'SELECT * FROM medicos where crm={valores[campos[5][0]]}')
+                    checar = cursor.fetchone()
+                    if checar is None:
+                        resposta = tk.Label(janela, text=f"Código do médico não encontrado!", font=fonte, fg="red")
+                        resposta.grid(row=len(campos)+3, column=1, pady=10)
+                        erro = True
+
+                    cursor.execute(f'SELECT * FROM exames where codigo={valores[campos[6][0]]}')
+                    checar = cursor.fetchone()
+                    if checar is None:                        
+                        resposta = tk.Label(janela, text=f"Código do exame não encontrado!", font=fonte, fg="red")
+                        resposta.grid(row=len(campos)+3, column=1, pady=10)
+                        erro = True
+                    if erro:
+                        return
+                    else:
+                        enviar_cadastrar(nome, tabela, valores, campos)
+        else:
+            resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=fonte, fg="red")
+
     else:
-        resposta = tk.Label(janela, text="Todos os campos devem ser preenchidos!", font=fonte, fg="red")
+        if valores[campos[0][0]] and valores[campos[1][0]] and valores[campos[2][0]]:
+            codigo = campos[0][0]
+            comando_sql = f'SELECT * FROM {tabela} WHERE {codigo} = "{valores[codigo]}"'
+            cursor.execute(comando_sql)
+            resultado = cursor.fetchall()
+            if resultado:
+                resposta = tk.Label(janela, text="Código já cadastrado!", font=fonte, fg="red")
+            else:
+                if resposta:
+                    resposta.destroy()
+                enviar_cadastrar(nome, tabela, valores, campos)
+        else:
+            resposta = tk.Label(janela, text="Todos os três primeiros campos devem ser preenchidos!", font=fonte, fg="red")
     resposta.grid(row=len(campos)+3, column=1, pady=10)
     
 def enviar_cadastrar(nome, tabela, valores, campos):
